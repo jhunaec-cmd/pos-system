@@ -19,6 +19,7 @@ import { isCameraScanSupported, startCameraScanner } from "./camera-scanner.js";
 import { renderReceipt, printReceipt } from "./receipt.js";
 import { formatMoney, showToast, generateId, generateReceiptNumber, round2 } from "./utils.js";
 import { requireAuth, lock } from "./auth.js";
+import { requireDeviceAuth } from "./device-auth.js";
 
 document.getElementById("nav-lock-btn").addEventListener("click", lock);
 
@@ -352,4 +353,4 @@ function escapeHtml(value) {
   return div.innerHTML;
 }
 
-requireAuth().then(init);
+requireDeviceAuth().then(requireAuth).then(init);

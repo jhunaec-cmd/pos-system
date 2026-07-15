@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Master Admin - POS</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2563eb" />
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml" />
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <!-- Device authorization gate - same as every other page, this device
+       must already be authorized before it can even reach the Master PIN. -->
+  <div class="auth-overlay" id="device-overlay">
+    <div class="auth-box">
+      <h1>🔐 Device Authorization</h1>
+      <p id="device-message">Checking this device...</p>
+      <form id="device-form">
+        <div class="field">
+          <label for="device-code">Authorization code</label>
+          <input type="text" id="device-code" autocomplete="off" required />
+        </div>
+        <p class="field-error" id="device-error" hidden></p>
+        <button type="submit" class="btn btn--primary" style="width:100%;">Authorize This Device</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Master PIN gate - separate secret from the staff PIN. Reuses the same
+       auth.js machinery (js/auth.js requireAuth), just pointed at a
+       different settings field and session key. -->
+  <div class="auth-overlay" id="auth-overlay">
+    <div class="auth-box">
+      <h1>🛡️ Master Access</h1>
+      <p id="auth-message">Checking...</p>
+      <form id="auth-form">
+        <div class="field">
+          <label for="auth-pin">Master PIN</label>
+          <input type="password" id="auth-pin" inputmode="numeric" autocomplete="off" required />
+        </div>
+        <div class="field" id="auth-confirm-field" hidden>
+          <label for="auth-pin-confirm">Confirm Master PIN</label>
+          <input type="password" id="auth-pin-confirm" inputmode="numeric" autocomplete="off" />
+        </div>
+        <p class="field-error" id="auth-error" hidden></p>
+        <button type="submit" class="btn btn--primary" style="width:100%;">Unlock</button>
+      </form>
+      <button type="button" class="auth-forgot" id="auth-forgot-btn">Forgot PIN?</button>
+    </div>
+  </div>
+
+  <nav class="app-nav" aria-label="Main navigation">
+    <span class="app-nav__brand">POS</span>
+    <a class="app-nav__link" href="index.html">← Back to App</a>
+  </nav>
+
+  <main class="page" style="max-width: 720px;">
+    <h1>Master Admin - Device Management</h1>
+    <p class="text-muted">
+      Every PC, tablet, or phone needs its own authorization code before it can even reach the
+      staff PIN screen. Add a device below to generate its code, or revoke one to lock a device
+      out. Changes here only take effect once they're published to <code>devices.json</code> -
+      see "Publish these changes" at the bottom.
+    </p>
+
+    <section class="card" style="margin-bottom: var(--space-lg);">
+      <h2>Authorized Devices</h2>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="device-table-body"></tbody>
+        </table>
+        <p class="empty-state" id="devices-empty" hidden>No devices yet - add one below.</p>
+      </div>
+    </section>
+
+    <section class="card" style="margin-bottom: var(--space-lg);">
+      <h2>Add a Device</h2>
+      <div class="field">
+        <label for="new-device-label">Device label</label>
+        <input type="text" id="new-device-label" placeholder="e.g. Front counter tablet" />
+      </div>
+      <button type="button" class="btn btn--primary" id="generate-code-btn">Generate Code</button>
+
+      <div id="new-code-box" class="card" style="margin-top: var(--space-md); background: var(--color-bg); display:none;">
+        <p><strong>Copy this code now - it cannot be shown again.</strong> Give it to whoever will use this device.</p>
+        <div style="display:flex; gap: var(--space-sm);">
+          <input type="text" id="new-code-value" readonly style="flex:1; font-family: monospace; font-size: var(--font-size-lg);" />
+          <button type="button" class="btn" id="copy-code-btn">Copy</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="publish-section" style="display:none;">
+      <h2>Publish These Changes</h2>
+      <p class="text-muted">
+        This page can't write back to GitHub directly (that would need a secret key exposed to
+        everyone). Copy the text below and either paste it over the contents of
+        <code>devices.json</code> in your GitHub repo yourself, or send it to Claude and ask to
+        publish it - devices won't see these changes until then.
+      </p>
+      <textarea id="json-output" readonly rows="10" style="width:100%; font-family: monospace; font-size: var(--font-size-sm); padding: var(--space-sm); border: 1px solid var(--color-border); border-radius: var(--radius);"></textarea>
+      <button type="button" class="btn btn--primary" id="copy-json-btn" style="margin-top: var(--space-sm);">Copy JSON</button>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script type="module" src="js/sw-register.js"></script>
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

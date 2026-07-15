@@ -143,6 +143,7 @@ const DEFAULT_SETTINGS = {
   taxRate: 0,
   currencySymbol: "BND$",
   pinHash: null,
+  masterPinHash: null,
 };
 
 export async function getSettings() {

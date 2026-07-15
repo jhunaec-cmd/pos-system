@@ -17,6 +17,24 @@
   <link rel="stylesheet" href="css/receipt.css" />
 </head>
 <body>
+  <!-- Device authorization gate - the FIRST gate, in front of even the PIN
+       lock. Confirms this specific gadget was authorized by the store owner
+       (see devices.json + admin.html) before it ever shows the PIN screen. -->
+  <div class="auth-overlay" id="device-overlay">
+    <div class="auth-box">
+      <h1>🔐 Device Authorization</h1>
+      <p id="device-message">Checking this device...</p>
+      <form id="device-form">
+        <div class="field">
+          <label for="device-code">Authorization code</label>
+          <input type="text" id="device-code" autocomplete="off" required />
+        </div>
+        <p class="field-error" id="device-error" hidden></p>
+        <button type="submit" class="btn btn--primary" style="width:100%;">Authorize This Device</button>
+      </form>
+    </div>
+  </div>
+
   <!-- Authorization lock screen - covers the whole app until the correct PIN
        is entered. Not just hidden by CSS: js/auth.js also blocks the page's
        real data from loading until this resolves. -->

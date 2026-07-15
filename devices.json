@@ -1,0 +1,10 @@
+{
+  "devices": [
+    {
+      "id": "d-owner-pc",
+      "label": "Owner's PC (first device)",
+      "codeHash": "d06ec659ca8a505b7f518bce2478a6e5ac94d489f8011e84c4ac9786f4cbb4fa",
+      "active": true
+    }
+  ]
+}

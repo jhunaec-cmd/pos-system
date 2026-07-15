@@ -13,29 +13,29 @@
   anything - so being "locked" isn't just a visual overlay with the real
   app quietly running behind it; no product/sales data is fetched until the
   correct PIN is entered.
+
+  This same logic also powers the separate "Master PIN" on admin.html - see
+  the settingsKey/sessionKey options below - so there's one PIN
+  implementation instead of two near-identical copies.
 */
 
 import * as db from "./db.js";
+import { sha256 } from "./utils.js";
 
-const SESSION_KEY = "pos-unlocked";
+const DEFAULT_OPTIONS = {
+  settingsKey: "pinHash", // which db.js settings field stores the hash
+  sessionKey: "pos-unlocked", // which sessionStorage flag marks it unlocked
+};
 
-/** Hashes text with SHA-256 so the PIN is never stored in plain text. */
-async function sha256(text) {
-  const data = new TextEncoder().encode(text);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-function isUnlockedThisSession() {
-  return sessionStorage.getItem(SESSION_KEY) === "1";
+function isUnlockedThisSession(sessionKey) {
+  return sessionStorage.getItem(sessionKey) === "1";
 }
 
 /** Clears the unlocked flag and reloads, showing the lock screen again.
  * Wired to the "Lock" button in the nav bar on every page. */
-export function lock() {
-  sessionStorage.removeItem(SESSION_KEY);
+export function lock(options = {}) {
+  const { sessionKey } = { ...DEFAULT_OPTIONS, ...options };
+  sessionStorage.removeItem(sessionKey);
   location.reload();
 }
 
@@ -45,7 +45,9 @@ export function lock() {
  *   requireAuth().then(init);
  * instead of just calling init() directly.
  */
-export async function requireAuth() {
+export async function requireAuth(options = {}) {
+  const { settingsKey, sessionKey } = { ...DEFAULT_OPTIONS, ...options };
+
   const overlay = document.getElementById("auth-overlay");
   const messageEl = document.getElementById("auth-message");
   const form = document.getElementById("auth-form");
@@ -55,13 +57,13 @@ export async function requireAuth() {
   const errorEl = document.getElementById("auth-error");
   const forgotBtn = document.getElementById("auth-forgot-btn");
 
-  if (isUnlockedThisSession()) {
+  if (isUnlockedThisSession(sessionKey)) {
     overlay.hidden = true;
     return;
   }
 
   const settings = await db.getSettings();
-  const firstRun = !settings.pinHash;
+  const firstRun = !settings[settingsKey];
 
   messageEl.textContent = firstRun
     ? "Set up a PIN to protect this POS system. Only share it with people you authorize to use it."
@@ -71,7 +73,7 @@ export async function requireAuth() {
   pinInput.focus();
 
   if (forgotBtn) {
-    forgotBtn.addEventListener("click", handleForgotPin);
+    forgotBtn.addEventListener("click", () => handleForgotPin(sessionKey));
   }
 
   return new Promise((resolve) => {
@@ -88,11 +90,11 @@ export async function requireAuth() {
           showError("PINs don't match.");
           return;
         }
-        await db.saveSettings({ pinHash: await sha256(pinInput.value) });
+        await db.saveSettings({ [settingsKey]: await sha256(pinInput.value) });
         finish();
       } else {
         const enteredHash = await sha256(pinInput.value);
-        if (enteredHash === settings.pinHash) {
+        if (enteredHash === settings[settingsKey]) {
           finish();
         } else {
           showError("Incorrect PIN.");
@@ -107,7 +109,7 @@ export async function requireAuth() {
       }
 
       function finish() {
-        sessionStorage.setItem(SESSION_KEY, "1");
+        sessionStorage.setItem(sessionKey, "1");
         overlay.hidden = true;
         form.removeEventListener("submit", onSubmit);
         resolve();
@@ -119,7 +121,7 @@ export async function requireAuth() {
 /** Last-resort recovery: since there's no server to verify identity and
  * reset a forgotten PIN safely, the only honest option is to wipe this
  * device's local data and start over. Used by the "Forgot PIN?" link. */
-async function handleForgotPin() {
+async function handleForgotPin(sessionKey) {
   const confirmed = confirm(
     "Resetting will permanently erase ALL products, sales, and settings on this device - there is no way to recover a forgotten PIN otherwise. Continue?"
   );
@@ -131,22 +133,25 @@ async function handleForgotPin() {
     request.onerror = () => reject(request.error);
   });
 
-  sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(sessionKey);
   location.reload();
 }
 
-/** Lets an already-unlocked user change their PIN from Settings. */
-export async function changePin(currentPin, newPin) {
+/** Lets an already-unlocked user change their PIN from Settings (or the
+ * Master PIN from admin.html, via the settingsKey option). */
+export async function changePin(currentPin, newPin, options = {}) {
+  const { settingsKey } = { ...DEFAULT_OPTIONS, ...options };
+
   const settings = await db.getSettings();
   const currentHash = await sha256(currentPin);
 
-  if (currentHash !== settings.pinHash) {
+  if (currentHash !== settings[settingsKey]) {
     return { ok: false, error: "Current PIN is incorrect." };
   }
   if (newPin.length < 4) {
     return { ok: false, error: "New PIN must be at least 4 characters." };
   }
 
-  await db.saveSettings({ pinHash: await sha256(newPin) });
+  await db.saveSettings({ [settingsKey]: await sha256(newPin) });
   return { ok: true };
 }

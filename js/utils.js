@@ -45,6 +45,17 @@ export function round2(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
+/** One-way hashes text with SHA-256 (hex string). Used so PINs and device
+ * codes are never stored in plain text - shared by js/auth.js (staff/master
+ * PIN) and js/device-auth.js (device codes) so there's one implementation. */
+export async function sha256(text) {
+  const data = new TextEncoder().encode(text);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 /** Turns one field into safe CSV text: wraps it in quotes (and doubles any
  * quotes inside) whenever it contains a comma, quote, or line break -
  * otherwise Excel would misread it as extra columns/rows. */

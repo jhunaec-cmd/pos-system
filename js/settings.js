@@ -9,6 +9,7 @@
 import * as db from "./db.js";
 import { showToast } from "./utils.js";
 import { requireAuth, lock, changePin } from "./auth.js";
+import { requireDeviceAuth } from "./device-auth.js";
 
 document.getElementById("nav-lock-btn").addEventListener("click", lock);
 
@@ -111,4 +112,4 @@ async function handleImport(event) {
   }
 }
 
-requireAuth().then(init);
+requireDeviceAuth().then(requireAuth).then(init);

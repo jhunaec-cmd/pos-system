@@ -11,7 +11,7 @@
   file, so returning users get the new version instead of a stale cache.
 */
 
-const CACHE_NAME = "pos-cache-v4";
+const CACHE_NAME = "pos-cache-v5";
 
 const APP_SHELL_FILES = [
   "./",
@@ -19,6 +19,7 @@ const APP_SHELL_FILES = [
   "./products.html",
   "./history.html",
   "./settings.html",
+  "./admin.html",
   "./manifest.json",
   "./css/variables.css",
   "./css/main.css",
@@ -26,6 +27,7 @@ const APP_SHELL_FILES = [
   "./css/receipt.css",
   "./js/db.js",
   "./js/auth.js",
+  "./js/device-auth.js",
   "./js/utils.js",
   "./js/cart.js",
   "./js/scanner.js",
@@ -35,8 +37,11 @@ const APP_SHELL_FILES = [
   "./js/products.js",
   "./js/history.js",
   "./js/settings.js",
+  "./js/admin.js",
   "./js/sw-register.js",
   "./assets/icons/icon.svg",
+  // devices.json is deliberately NOT cached here - it must always be
+  // fetched fresh (see device-auth.js) so revoking a device actually works.
 ];
 
 // On install, download and cache every app shell file up front.
@@ -57,10 +62,25 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+// devices.json must always be fetched from the network, never from this
+// cache - device-auth.js relies on it being fresh to make revoking a
+// device actually work. Without this, this fetch handler would happily
+// cache the first copy it ever saw and keep serving that forever, even
+// though the page's own `cache: "no-store"` option only bypasses the
+// browser's HTTP cache, not this service worker's interception of it.
+function isNetworkOnly(request) {
+  return new URL(request.url).pathname.endsWith("/devices.json");
+}
+
 // Cache-first strategy: serve from cache instantly when available (works
 // offline), otherwise fetch from the network and store a copy for next time.
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  if (isNetworkOnly(event.request)) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cached) => {

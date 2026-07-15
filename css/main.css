@@ -252,6 +252,12 @@ button.app-nav__link {
   display: none;
 }
 
+/* The device-authorization gate sits in front of the PIN gate, so it needs
+   a higher stacking order while both could theoretically be present. */
+#device-overlay {
+  z-index: 600;
+}
+
 .auth-box {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
