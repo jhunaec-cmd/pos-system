@@ -133,6 +133,38 @@
         Need to authorize a new PC/tablet/phone, or shut one off? That's handled separately in the
         <a href="admin.html">Master Admin</a> tool (protected by its own Master PIN).
       </p>
+
+      <div class="field" style="margin-top: var(--space-md);">
+        <label for="auto-lock-minutes">Auto-lock after inactivity</label>
+        <select id="auto-lock-minutes">
+          <option value="0">Off</option>
+          <option value="1">1 minute</option>
+          <option value="5">5 minutes</option>
+          <option value="15">15 minutes</option>
+          <option value="30">30 minutes</option>
+        </select>
+      </div>
+      <button type="button" class="btn btn--primary" id="save-auto-lock-btn">Save Auto-Lock Setting</button>
+    </section>
+
+    <section class="card" style="margin-top: var(--space-lg);">
+      <h2>Scanning</h2>
+      <p class="text-muted">
+        The scanner sound on/off button is on the Checkout page, next to the scanner status.
+      </p>
+      <div class="field">
+        <label for="scanner-sensitivity">Scanner sensitivity</label>
+        <select id="scanner-sensitivity">
+          <option value="low">Low (strict timing - fewer accidental triggers)</option>
+          <option value="medium">Medium (default)</option>
+          <option value="high">High (lenient - for slower/older scanners)</option>
+        </select>
+        <span class="text-muted" style="font-size: var(--font-size-sm);">
+          If your barcode scanner isn't being detected, try raising this. If normal typing
+          accidentally triggers a "scan", lower it.
+        </span>
+      </div>
+      <button type="button" class="btn btn--primary" id="save-scanner-settings-btn">Save Scanner Setting</button>
     </section>
   </main>
 

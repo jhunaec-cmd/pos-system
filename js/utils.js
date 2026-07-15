@@ -91,6 +91,34 @@ export function downloadCsv(filename, headers, rows) {
   URL.revokeObjectURL(url);
 }
 
+let sharedAudioContext = null;
+
+/** Plays a short, synthesized "beep" - like a barcode scanner's own buzzer -
+ * whenever a barcode is successfully read (USB scanner or camera). Built
+ * with the Web Audio API instead of an audio file, so there's nothing extra
+ * to download or host. Fails silently if audio is blocked (e.g. the page
+ * hasn't had a user interaction yet) - scanning itself still works fine. */
+export function playBeep() {
+  try {
+    if (!sharedAudioContext) {
+      sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const oscillator = sharedAudioContext.createOscillator();
+    const gain = sharedAudioContext.createGain();
+    oscillator.connect(gain);
+    gain.connect(sharedAudioContext.destination);
+
+    oscillator.frequency.value = 1000; // a typical scanner-beep pitch
+    gain.gain.setValueAtTime(0.2, sharedAudioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, sharedAudioContext.currentTime + 0.15);
+
+    oscillator.start();
+    oscillator.stop(sharedAudioContext.currentTime + 0.15);
+  } catch {
+    // Audio unavailable/blocked - not worth interrupting the scan for.
+  }
+}
+
 /** Shows a small toast message at the bottom of the screen for a couple
  * of seconds. Every page includes a <div id="toast" class="toast" hidden>
  * element for this to use. */

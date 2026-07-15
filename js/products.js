@@ -6,8 +6,8 @@
 */
 
 import * as db from "./db.js";
-import { formatMoney, generateId, showToast } from "./utils.js";
-import { requireAuth, lock } from "./auth.js";
+import { formatMoney, generateId, showToast, playBeep } from "./utils.js";
+import { requireAuth, lock, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
 import { isCameraScanSupported, startCameraScanner } from "./camera-scanner.js";
 
@@ -88,6 +88,7 @@ async function openCameraModal() {
 
   const stop = await startCameraScanner(cameraVideo, {
     onDetect: (barcode) => {
+      if (settings.scannerSoundEnabled) playBeep();
       closeCameraModal();
       barcodeField.value = barcode;
       document.getElementById("product-barcode-error").hidden = true;
@@ -231,4 +232,4 @@ function escapeHtml(value) {
   return div.innerHTML;
 }
 
-requireDeviceAuth().then(requireAuth).then(init);
+requireDeviceAuth().then(requireAuth).then(init).then(startIdleTimer);

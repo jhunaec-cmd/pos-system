@@ -9,7 +9,7 @@
   secret in public JS, which anyone could then steal and use.
 */
 
-import { requireAuth } from "./auth.js";
+import { requireAuth, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
 import { sha256, showToast } from "./utils.js";
 
@@ -143,4 +143,5 @@ function escapeHtml(value) {
 
 requireDeviceAuth()
   .then(() => requireAuth(MASTER_AUTH_OPTIONS))
-  .then(init);
+  .then(init)
+  .then(() => startIdleTimer(MASTER_AUTH_OPTIONS));

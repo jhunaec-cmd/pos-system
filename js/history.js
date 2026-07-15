@@ -9,7 +9,7 @@
 import * as db from "./db.js";
 import { renderReceipt, printReceipt } from "./receipt.js";
 import { formatMoney, formatDateTime, downloadCsv, showToast, sha256 } from "./utils.js";
-import { requireAuth, lock } from "./auth.js";
+import { requireAuth, lock, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
 
 document.getElementById("nav-lock-btn").addEventListener("click", lock);
@@ -200,4 +200,4 @@ function openSale(sale) {
   saleModal.hidden = false;
 }
 
-requireDeviceAuth().then(requireAuth).then(init);
+requireDeviceAuth().then(requireAuth).then(init).then(startIdleTimer);

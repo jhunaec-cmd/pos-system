@@ -15,14 +15,28 @@
   element currently has focus - no need for a special always-focused input.
 */
 
-const MAX_KEY_GAP_MS = 50; // max time between keystrokes to still count as "fast"
+// How many milliseconds between keystrokes still counts as "part of the
+// same fast burst". Some scanners (especially older/Bluetooth ones) send
+// characters a bit slower than others, so this is adjustable in Settings:
+// - "low" is strict (fewer accidental triggers from fast human typing)
+// - "high" is lenient (catches slower scanners, at a small risk of a very
+//   fast typist accidentally triggering a "scan")
+export const SENSITIVITY_PRESETS = {
+  low: 25,
+  medium: 50,
+  high: 100,
+};
+
 const MIN_SCAN_LENGTH = 3; // shortest barcode we'll accept as a real scan
 
 /**
  * Starts listening for scanner input.
  * @param {(code: string) => void} onScan - called with the scanned barcode text.
+ * @param {"low"|"medium"|"high"} sensitivity - how lenient the timing check is.
  */
-export function initScanner(onScan) {
+export function initScanner(onScan, sensitivity = "medium") {
+  const maxKeyGap = SENSITIVITY_PRESETS[sensitivity] || SENSITIVITY_PRESETS.medium;
+
   let buffer = "";
   let lastKeyTime = 0;
 
@@ -48,7 +62,7 @@ export function initScanner(onScan) {
     if (event.key.length === 1) {
       // Too slow since the last key: this is a fresh burst (or human typing),
       // start the buffer over.
-      buffer = gap > MAX_KEY_GAP_MS ? event.key : buffer + event.key;
+      buffer = gap > maxKeyGap ? event.key : buffer + event.key;
     } else {
       // Any other key (Tab, arrows, Backspace, etc.) breaks the burst.
       buffer = "";

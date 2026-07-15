@@ -8,7 +8,7 @@
 
 import * as db from "./db.js";
 import { showToast } from "./utils.js";
-import { requireAuth, lock, changePin } from "./auth.js";
+import { requireAuth, lock, changePin, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
 
 document.getElementById("nav-lock-btn").addEventListener("click", lock);
@@ -27,17 +27,36 @@ const currentPinField = document.getElementById("current-pin");
 const newPinField = document.getElementById("new-pin");
 const newPinConfirmField = document.getElementById("new-pin-confirm");
 
+const autoLockField = document.getElementById("auto-lock-minutes");
+const saveAutoLockBtn = document.getElementById("save-auto-lock-btn");
+const scannerSensitivityField = document.getElementById("scanner-sensitivity");
+const saveScannerSettingsBtn = document.getElementById("save-scanner-settings-btn");
+
 async function init() {
   const settings = await db.getSettings();
   storeNameField.value = settings.storeName;
   storeAddressField.value = settings.storeAddress;
   taxRateField.value = settings.taxRate;
   currencySymbolField.value = settings.currencySymbol;
+  autoLockField.value = String(settings.autoLockMinutes || 0);
+  scannerSensitivityField.value = settings.scannerSensitivity || "medium";
 
   form.addEventListener("submit", handleSave);
   exportBtn.addEventListener("click", handleExport);
   importInput.addEventListener("change", handleImport);
   changePinForm.addEventListener("submit", handleChangePin);
+  saveAutoLockBtn.addEventListener("click", handleSaveAutoLock);
+  saveScannerSettingsBtn.addEventListener("click", handleSaveScannerSettings);
+}
+
+async function handleSaveAutoLock() {
+  await db.saveSettings({ autoLockMinutes: Number(autoLockField.value) || 0 });
+  showToast("Auto-lock setting saved");
+}
+
+async function handleSaveScannerSettings() {
+  await db.saveSettings({ scannerSensitivity: scannerSensitivityField.value });
+  showToast("Scanner setting saved");
 }
 
 async function handleChangePin(event) {
@@ -112,4 +131,4 @@ async function handleImport(event) {
   }
 }
 
-requireDeviceAuth().then(requireAuth).then(init);
+requireDeviceAuth().then(requireAuth).then(init).then(startIdleTimer);

@@ -17,8 +17,8 @@ import { Cart } from "./cart.js";
 import { initScanner } from "./scanner.js";
 import { isCameraScanSupported, startCameraScanner } from "./camera-scanner.js";
 import { renderReceipt, printReceipt } from "./receipt.js";
-import { formatMoney, showToast, generateId, generateReceiptNumber, round2 } from "./utils.js";
-import { requireAuth, lock } from "./auth.js";
+import { formatMoney, showToast, generateId, generateReceiptNumber, round2, playBeep } from "./utils.js";
+import { requireAuth, lock, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
 
 document.getElementById("nav-lock-btn").addEventListener("click", lock);
@@ -51,6 +51,8 @@ const receiptContainer = document.getElementById("receipt-container");
 const printReceiptBtn = document.getElementById("print-receipt-btn");
 const newSaleBtn = document.getElementById("new-sale-btn");
 
+const scannerSoundBtn = document.getElementById("scanner-sound-btn");
+
 const cameraScanBtn = document.getElementById("camera-scan-btn");
 const cameraModal = document.getElementById("camera-modal");
 const cameraVideo = document.getElementById("camera-video");
@@ -63,7 +65,14 @@ async function init() {
   renderProductGrid(products);
   renderCart();
 
-  initScanner(handleScan);
+  initScanner(handleScan, settings.scannerSensitivity);
+
+  updateScannerSoundBtn();
+  scannerSoundBtn.addEventListener("click", async () => {
+    settings.scannerSoundEnabled = !settings.scannerSoundEnabled;
+    await db.saveSettings({ scannerSoundEnabled: settings.scannerSoundEnabled });
+    updateScannerSoundBtn();
+  });
 
   searchInput.addEventListener("input", () => {
     const term = searchInput.value.trim().toLowerCase();
@@ -177,12 +186,18 @@ function addToCart(product) {
 /** Called by scanner.js (USB scanner) or the camera scanner whenever a
  * barcode is read. */
 async function handleScan(barcode) {
+  if (settings.scannerSoundEnabled) playBeep();
+
   const product = products.find((p) => p.barcode === barcode);
   if (!product) {
     showToast(`No product found for barcode ${barcode}`);
     return;
   }
   addToCart(product);
+}
+
+function updateScannerSoundBtn() {
+  scannerSoundBtn.textContent = settings.scannerSoundEnabled ? "🔊 Sound: On" : "🔇 Sound: Off";
 }
 
 /* ---------- Camera barcode scanner ---------- */
@@ -353,4 +368,4 @@ function escapeHtml(value) {
   return div.innerHTML;
 }
 
-requireDeviceAuth().then(requireAuth).then(init);
+requireDeviceAuth().then(requireAuth).then(init).then(startIdleTimer);

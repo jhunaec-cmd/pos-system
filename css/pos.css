@@ -163,12 +163,17 @@
 
 /* --- Barcode scanner status pill --- */
 .scanner-status {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: var(--space-xs);
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   margin-bottom: var(--space-sm);
+}
+
+#scanner-sound-btn {
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
 }
 
 .scanner-status__dot {

@@ -155,3 +155,32 @@ export async function changePin(currentPin, newPin, options = {}) {
   await db.saveSettings({ [settingsKey]: await sha256(newPin) });
   return { ok: true };
 }
+
+/**
+ * Automatically re-locks the page after a period of no mouse/keyboard/touch
+ * activity - so a till left unattended doesn't stay unlocked indefinitely.
+ * Controlled by the "Auto-lock after inactivity" setting (0 = disabled).
+ * Call this once, after requireAuth() has resolved:
+ *   requireDeviceAuth().then(requireAuth).then(init).then(startIdleTimer);
+ */
+export async function startIdleTimer(options = {}) {
+  const { sessionKey } = { ...DEFAULT_OPTIONS, ...options };
+
+  const settings = await db.getSettings();
+  const minutes = Number(settings.autoLockMinutes) || 0;
+  if (minutes <= 0) return; // disabled
+
+  const timeoutMs = minutes * 60 * 1000;
+  let timer;
+
+  function resetTimer() {
+    clearTimeout(timer);
+    timer = setTimeout(() => lock({ sessionKey }), timeoutMs);
+  }
+
+  ["mousedown", "mousemove", "keydown", "touchstart", "scroll"].forEach((eventName) => {
+    document.addEventListener(eventName, resetTimer, { passive: true });
+  });
+
+  resetTimer();
+}
