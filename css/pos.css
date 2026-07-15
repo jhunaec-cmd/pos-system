@@ -14,8 +14,50 @@
 }
 
 /* --- Product search + grid --- */
-.pos-products__search {
+.pos-products__search-row {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
   margin-bottom: var(--space-md);
+}
+
+.pos-products__search {
+  flex: 1 1 200px;
+  margin-bottom: 0;
+}
+
+#camera-scan-btn {
+  white-space: nowrap;
+}
+
+/* --- Camera barcode scanner --- */
+.camera-view {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #000;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: var(--space-md);
+}
+
+.camera-view video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A simple rectangle overlay showing where to line up the barcode. */
+.camera-view__guide {
+  position: absolute;
+  top: 35%;
+  left: 10%;
+  right: 10%;
+  bottom: 35%;
+  border: 3px solid var(--color-success);
+  border-radius: var(--radius);
+  pointer-events: none;
 }
 
 .product-grid {

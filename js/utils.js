@@ -45,6 +45,41 @@ export function round2(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
+/** Turns one field into safe CSV text: wraps it in quotes (and doubles any
+ * quotes inside) whenever it contains a comma, quote, or line break -
+ * otherwise Excel would misread it as extra columns/rows. */
+function toCsvField(value) {
+  const text = String(value ?? "");
+  if (/[",\n]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+}
+
+/** Builds a CSV file from a list of column headers and row arrays, and
+ * downloads it. Excel opens .csv files directly, so this needs no extra
+ * library - just a correctly-escaped text file.
+ * @param {string} filename
+ * @param {string[]} headers
+ * @param {Array<Array<string|number>>} rows
+ */
+export function downloadCsv(filename, headers, rows) {
+  const lines = [headers, ...rows].map((row) => row.map(toCsvField).join(","));
+  // The leading ﻿ (byte-order mark) tells Excel on Windows this file is
+  // UTF-8, so currency symbols and non-English text display correctly.
+  const csvText = "﻿" + lines.join("\r\n");
+
+  const blob = new Blob([csvText], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
+
 /** Shows a small toast message at the bottom of the screen for a couple
  * of seconds. Every page includes a <div id="toast" class="toast" hidden>
  * element for this to use. */

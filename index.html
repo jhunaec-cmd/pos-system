@@ -34,14 +34,17 @@
           Barcode scanner ready - scan an item any time
         </div>
 
-        <div class="field pos-products__search">
-          <label for="product-search">Search products</label>
-          <input
-            type="search"
-            id="product-search"
-            placeholder="Type a name or SKU..."
-            autocomplete="off"
-          />
+        <div class="pos-products__search-row">
+          <div class="field pos-products__search">
+            <label for="product-search">Search products</label>
+            <input
+              type="search"
+              id="product-search"
+              placeholder="Type a name or SKU..."
+              autocomplete="off"
+            />
+          </div>
+          <button type="button" class="btn" id="camera-scan-btn">📷 Scan with Camera</button>
         </div>
 
         <div id="product-grid" class="product-grid" aria-live="polite">
@@ -100,6 +103,21 @@
       <div class="modal__actions">
         <button type="button" class="btn" id="cancel-payment-btn">Cancel</button>
         <button type="button" class="btn btn--success" id="confirm-payment-btn">Confirm Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Camera barcode scanner modal -->
+  <div class="modal-overlay" id="camera-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="camera-modal-title">
+      <h2 id="camera-modal-title">Scan a Barcode</h2>
+      <div class="camera-view">
+        <video id="camera-video" autoplay playsinline muted></video>
+        <div class="camera-view__guide" aria-hidden="true"></div>
+      </div>
+      <p class="text-muted">Point the camera at a barcode. It'll be added to the cart automatically.</p>
+      <div class="modal__actions">
+        <button type="button" class="btn" id="cancel-camera-btn">Cancel</button>
       </div>
     </div>
   </div>

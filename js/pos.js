@@ -15,6 +15,7 @@
 import * as db from "./db.js";
 import { Cart } from "./cart.js";
 import { initScanner } from "./scanner.js";
+import { isCameraScanSupported, startCameraScanner } from "./camera-scanner.js";
 import { renderReceipt, printReceipt } from "./receipt.js";
 import { formatMoney, showToast, generateId, generateReceiptNumber, round2 } from "./utils.js";
 
@@ -45,6 +46,12 @@ const receiptModal = document.getElementById("receipt-modal");
 const receiptContainer = document.getElementById("receipt-container");
 const printReceiptBtn = document.getElementById("print-receipt-btn");
 const newSaleBtn = document.getElementById("new-sale-btn");
+
+const cameraScanBtn = document.getElementById("camera-scan-btn");
+const cameraModal = document.getElementById("camera-modal");
+const cameraVideo = document.getElementById("camera-video");
+const cancelCameraBtn = document.getElementById("cancel-camera-btn");
+let stopCamera = null; // set while the camera modal is open
 
 async function init() {
   settings = await db.getSettings();
@@ -114,6 +121,14 @@ async function init() {
 
   printReceiptBtn.addEventListener("click", printReceipt);
   newSaleBtn.addEventListener("click", startNewSale);
+
+  if (isCameraScanSupported()) {
+    cameraScanBtn.addEventListener("click", openCameraModal);
+  } else {
+    cameraScanBtn.disabled = true;
+    cameraScanBtn.title = "Camera scanning isn't supported in this browser - try Chrome, Edge, or Safari, or use search / a USB scanner instead.";
+  }
+  cancelCameraBtn.addEventListener("click", closeCameraModal);
 }
 
 /* ---------- Product grid ---------- */
@@ -155,8 +170,8 @@ function addToCart(product) {
   renderCart();
 }
 
-/** Called by scanner.js whenever a fast barcode-style keystroke burst is
- * detected, ending in Enter. */
+/** Called by scanner.js (USB scanner) or the camera scanner whenever a
+ * barcode is read. */
 async function handleScan(barcode) {
   const product = products.find((p) => p.barcode === barcode);
   if (!product) {
@@ -164,6 +179,43 @@ async function handleScan(barcode) {
     return;
   }
   addToCart(product);
+}
+
+/* ---------- Camera barcode scanner ---------- */
+
+let cameraModalOpen = false;
+
+async function openCameraModal() {
+  cameraModal.hidden = false;
+  cameraModalOpen = true;
+
+  const stop = await startCameraScanner(cameraVideo, {
+    onDetect: (barcode) => {
+      closeCameraModal();
+      handleScan(barcode);
+    },
+    onError: (error) => {
+      closeCameraModal();
+      showToast(`Could not access camera: ${error.message || "permission denied"}`);
+    },
+  });
+
+  if (!cameraModalOpen) {
+    // The modal was cancelled before the camera finished starting up -
+    // stop it immediately instead of leaving it running in the background.
+    stop();
+    return;
+  }
+  stopCamera = stop;
+}
+
+function closeCameraModal() {
+  cameraModal.hidden = true;
+  cameraModalOpen = false;
+  if (stopCamera) {
+    stopCamera();
+    stopCamera = null;
+  }
 }
 
 /* ---------- Cart rendering ---------- */

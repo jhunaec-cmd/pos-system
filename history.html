@@ -23,9 +23,12 @@
   </nav>
 
   <main class="page">
-    <h1>Sales History</h1>
+    <div style="display:flex; align-items:center; gap: var(--space-md); flex-wrap: wrap;">
+      <h1 style="margin:0;">Sales History</h1>
+      <button type="button" class="btn" id="export-csv-btn" style="margin-left:auto;">Export to Excel (CSV)</button>
+    </div>
 
-    <div style="display:flex; gap: var(--space-md); flex-wrap: wrap; margin-bottom: var(--space-lg);">
+    <div style="display:flex; gap: var(--space-md); flex-wrap: wrap; margin: var(--space-md) 0 var(--space-lg);">
       <div class="card" style="flex:1; min-width: 160px;">
         <div class="text-muted">Today's Sales</div>
         <div style="font-size: var(--font-size-xl); font-weight:700;" id="today-count">0</div>

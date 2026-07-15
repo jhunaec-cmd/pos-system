@@ -11,7 +11,7 @@
   file, so returning users get the new version instead of a stale cache.
 */
 
-const CACHE_NAME = "pos-cache-v2";
+const CACHE_NAME = "pos-cache-v3";
 
 const APP_SHELL_FILES = [
   "./",
@@ -28,6 +28,7 @@ const APP_SHELL_FILES = [
   "./js/utils.js",
   "./js/cart.js",
   "./js/scanner.js",
+  "./js/camera-scanner.js",
   "./js/receipt.js",
   "./js/pos.js",
   "./js/products.js",
