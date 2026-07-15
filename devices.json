@@ -5,6 +5,12 @@
       "label": "Owner's PC (first device)",
       "codeHash": "d06ec659ca8a505b7f518bce2478a6e5ac94d489f8011e84c4ac9786f4cbb4fa",
       "active": true
+    },
+    {
+      "id": "d-staff-phone",
+      "label": "Staff Phone",
+      "codeHash": "83d952142486ff745f17212401fe98cdb5953f811a40b8d4462e61f7cf2c199b",
+      "active": true
     }
   ]
 }
