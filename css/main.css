@@ -285,6 +285,36 @@ button.app-nav__link {
   cursor: pointer;
 }
 
+/* --- Camera barcode scanner (used on both the checkout page and the
+   product form, for scanning vs. typing in a barcode) --- */
+.camera-view {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #000;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: var(--space-md);
+}
+
+.camera-view video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A simple rectangle overlay showing where to line up the barcode. */
+.camera-view__guide {
+  position: absolute;
+  top: 35%;
+  left: 10%;
+  right: 10%;
+  bottom: 35%;
+  border: 3px solid var(--color-success);
+  border-radius: var(--radius);
+  pointer-events: none;
+}
+
 /* --- Small helper classes --- */
 .text-muted {
   color: var(--color-text-muted);

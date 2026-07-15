@@ -9,6 +9,7 @@ import * as db from "./db.js";
 import { formatMoney, generateId, showToast } from "./utils.js";
 import { requireAuth, lock } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
+import { isCameraScanSupported, startCameraScanner } from "./camera-scanner.js";
 
 document.getElementById("nav-lock-btn").addEventListener("click", lock);
 
@@ -30,6 +31,13 @@ const priceField = document.getElementById("product-price");
 const categoryField = document.getElementById("product-category");
 const stockField = document.getElementById("product-stock");
 const cancelBtn = document.getElementById("cancel-product-btn");
+
+const scanBarcodeBtn = document.getElementById("scan-barcode-btn");
+const cameraModal = document.getElementById("camera-modal");
+const cameraVideo = document.getElementById("camera-video");
+const cancelCameraBtn = document.getElementById("cancel-camera-btn");
+let stopCamera = null; // set while the camera modal is open
+let cameraModalOpen = false;
 
 async function init() {
   settings = await db.getSettings();
@@ -62,6 +70,50 @@ async function init() {
       handleDelete(product);
     }
   });
+
+  if (isCameraScanSupported()) {
+    scanBarcodeBtn.addEventListener("click", openCameraModal);
+  } else {
+    scanBarcodeBtn.disabled = true;
+    scanBarcodeBtn.title = "Camera scanning isn't supported in this browser - try Chrome, Edge, or Safari, or type the barcode instead.";
+  }
+  cancelCameraBtn.addEventListener("click", closeCameraModal);
+}
+
+/* ---------- Camera barcode scanner ---------- */
+
+async function openCameraModal() {
+  cameraModal.hidden = false;
+  cameraModalOpen = true;
+
+  const stop = await startCameraScanner(cameraVideo, {
+    onDetect: (barcode) => {
+      closeCameraModal();
+      barcodeField.value = barcode;
+      document.getElementById("product-barcode-error").hidden = true;
+    },
+    onError: (error) => {
+      closeCameraModal();
+      showToast(`Could not access camera: ${error.message || "permission denied"}`);
+    },
+  });
+
+  if (!cameraModalOpen) {
+    // The modal was cancelled before the camera finished starting up -
+    // stop it immediately instead of leaving it running in the background.
+    stop();
+    return;
+  }
+  stopCamera = stop;
+}
+
+function closeCameraModal() {
+  cameraModal.hidden = true;
+  cameraModalOpen = false;
+  if (stopCamera) {
+    stopCamera();
+    stopCamera = null;
+  }
 }
 
 function renderTable(list) {
