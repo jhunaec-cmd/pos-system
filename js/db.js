@@ -135,6 +135,12 @@ export async function getSaleById(id) {
   return withStore("sales", "readonly", (store) => requestToPromise(store.get(id)));
 }
 
+/** Permanently deletes every sale record. Used by the "Reset History"
+ * button on history.html, after its own separate password check. */
+export async function clearAllSales() {
+  await withStore("sales", "readwrite", (store) => store.clear());
+}
+
 /* ---------- Settings ---------- */
 
 const DEFAULT_SETTINGS = {
@@ -144,6 +150,7 @@ const DEFAULT_SETTINGS = {
   currencySymbol: "$",
   pinHash: null,
   masterPinHash: null,
+  resetHistoryPinHash: null,
 };
 
 export async function getSettings() {

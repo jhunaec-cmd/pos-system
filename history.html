@@ -68,7 +68,10 @@
   <main class="page">
     <div style="display:flex; align-items:center; gap: var(--space-md); flex-wrap: wrap;">
       <h1 style="margin:0;">Sales History</h1>
-      <button type="button" class="btn" id="export-csv-btn" style="margin-left:auto;">Export to Excel (CSV)</button>
+      <div style="display:flex; gap: var(--space-sm); margin-left:auto; flex-wrap: wrap;">
+        <button type="button" class="btn" id="export-csv-btn">Export to Excel (CSV)</button>
+        <button type="button" class="btn btn--danger" id="reset-history-btn">Reset History</button>
+      </div>
     </div>
 
     <div style="display:flex; gap: var(--space-md); flex-wrap: wrap; margin: var(--space-md) 0 var(--space-lg);">
@@ -109,6 +112,31 @@
         <button type="button" class="btn" id="close-sale-btn">Close</button>
         <button type="button" class="btn btn--primary" id="print-sale-btn">Print</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Reset History confirmation modal - protected by its own separate
+       password (not the staff PIN or Master PIN), since permanently
+       deleting all sales records is a big, one-way action. -->
+  <div class="modal-overlay" id="reset-history-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reset-history-title">
+      <h2 id="reset-history-title">Reset Sales History</h2>
+      <p id="reset-history-message">Checking...</p>
+      <form id="reset-history-form">
+        <div class="field">
+          <label for="reset-history-pin">Reset password</label>
+          <input type="password" id="reset-history-pin" autocomplete="off" required />
+        </div>
+        <div class="field" id="reset-history-confirm-field" hidden>
+          <label for="reset-history-pin-confirm">Confirm reset password</label>
+          <input type="password" id="reset-history-pin-confirm" autocomplete="off" />
+        </div>
+        <p class="field-error" id="reset-history-error" hidden></p>
+        <div class="modal__actions">
+          <button type="button" class="btn" id="cancel-reset-history-btn">Cancel</button>
+          <button type="submit" class="btn btn--danger">Delete All History</button>
+        </div>
+      </form>
     </div>
   </div>
 
