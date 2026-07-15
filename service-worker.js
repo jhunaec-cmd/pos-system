@@ -11,7 +11,7 @@
   file, so returning users get the new version instead of a stale cache.
 */
 
-const CACHE_NAME = "pos-cache-v10";
+const CACHE_NAME = "pos-cache-v11";
 
 const APP_SHELL_FILES = [
   "./",
@@ -40,6 +40,9 @@ const APP_SHELL_FILES = [
   "./js/admin.js",
   "./js/sw-register.js",
   "./assets/icons/icon.svg",
+  "./assets/icons/icon-192.png",
+  "./assets/icons/icon-512.png",
+  "./assets/icons/icon-180.png",
   // devices.json is deliberately NOT cached here - it must always be
   // fetched fresh (see device-auth.js) so revoking a device actually works.
 ];
