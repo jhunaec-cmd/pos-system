@@ -64,7 +64,7 @@ async function handleSave(event) {
     storeName: storeNameField.value.trim() || "My Store",
     storeAddress: storeAddressField.value.trim(),
     taxRate: Number(taxRateField.value) || 0,
-    currencySymbol: currencySymbolField.value.trim() || "RM",
+    currencySymbol: currencySymbolField.value.trim() || "$",
   });
 
   showToast("Settings saved");

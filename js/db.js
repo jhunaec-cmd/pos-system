@@ -141,7 +141,7 @@ const DEFAULT_SETTINGS = {
   storeName: "My Store",
   storeAddress: "",
   taxRate: 0,
-  currencySymbol: "BND$",
+  currencySymbol: "$",
   pinHash: null,
   masterPinHash: null,
 };
