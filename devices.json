@@ -11,6 +11,12 @@
       "label": "Jun Mobile",
       "codeHash": "90d021450258c0fdcaec39e75ec8a76df8d98db9da244f59e6da523703a59a49",
       "active": true
+    },
+    {
+      "id": "d-jun-tab",
+      "label": "Jun Tab",
+      "codeHash": "437252f5d3872b9206a30bfe5de7865df513eaa698c47fdb08b1986c48298e96",
+      "active": true
     }
   ]
 }
