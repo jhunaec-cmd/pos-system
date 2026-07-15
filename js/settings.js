@@ -8,6 +8,9 @@
 
 import * as db from "./db.js";
 import { showToast } from "./utils.js";
+import { requireAuth, lock, changePin } from "./auth.js";
+
+document.getElementById("nav-lock-btn").addEventListener("click", lock);
 
 const form = document.getElementById("settings-form");
 const storeNameField = document.getElementById("store-name");
@@ -17,6 +20,11 @@ const currencySymbolField = document.getElementById("currency-symbol");
 
 const exportBtn = document.getElementById("export-btn");
 const importInput = document.getElementById("import-input");
+
+const changePinForm = document.getElementById("change-pin-form");
+const currentPinField = document.getElementById("current-pin");
+const newPinField = document.getElementById("new-pin");
+const newPinConfirmField = document.getElementById("new-pin-confirm");
 
 async function init() {
   const settings = await db.getSettings();
@@ -28,6 +36,24 @@ async function init() {
   form.addEventListener("submit", handleSave);
   exportBtn.addEventListener("click", handleExport);
   importInput.addEventListener("change", handleImport);
+  changePinForm.addEventListener("submit", handleChangePin);
+}
+
+async function handleChangePin(event) {
+  event.preventDefault();
+
+  if (newPinField.value !== newPinConfirmField.value) {
+    showToast("New PINs don't match");
+    return;
+  }
+
+  const result = await changePin(currentPinField.value, newPinField.value);
+  if (result.ok) {
+    changePinForm.reset();
+    showToast("PIN changed");
+  } else {
+    showToast(result.error);
+  }
 }
 
 async function handleSave(event) {
@@ -85,4 +111,4 @@ async function handleImport(event) {
   }
 }
 
-init();
+requireAuth().then(init);

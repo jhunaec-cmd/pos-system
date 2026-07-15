@@ -18,6 +18,9 @@ import { initScanner } from "./scanner.js";
 import { isCameraScanSupported, startCameraScanner } from "./camera-scanner.js";
 import { renderReceipt, printReceipt } from "./receipt.js";
 import { formatMoney, showToast, generateId, generateReceiptNumber, round2 } from "./utils.js";
+import { requireAuth, lock } from "./auth.js";
+
+document.getElementById("nav-lock-btn").addEventListener("click", lock);
 
 const cart = new Cart();
 let products = [];
@@ -349,4 +352,4 @@ function escapeHtml(value) {
   return div.innerHTML;
 }
 
-init();
+requireAuth().then(init);

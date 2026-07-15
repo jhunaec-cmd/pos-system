@@ -61,6 +61,15 @@ img {
   background: var(--color-bg);
 }
 
+/* Lets the nav's "Lock" button share the same look as the <a> nav links,
+   even though buttons come with their own default border/background. */
+button.app-nav__link {
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
 .app-nav__link[aria-current="page"] {
   background: var(--color-primary);
   color: #fff;
@@ -221,6 +230,53 @@ img {
   justify-content: flex-end;
   gap: var(--space-sm);
   margin-top: var(--space-md);
+}
+
+/* --- PIN lock screen ---
+   Unlike .modal-overlay (semi-transparent, dims the page behind it), this
+   is fully opaque and sits above everything (z-index 500) - nothing of the
+   app should be visible or usable while it's up. It has no [hidden] by
+   default in the HTML, so the page fails "locked" if JS is ever slow. */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+}
+
+.auth-overlay[hidden] {
+  display: none;
+}
+
+.auth-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space-lg);
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+}
+
+.auth-box form {
+  text-align: left;
+  margin-top: var(--space-md);
+}
+
+.auth-forgot {
+  display: inline-block;
+  margin-top: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 /* --- Small helper classes --- */

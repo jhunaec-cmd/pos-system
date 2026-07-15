@@ -12,7 +12,7 @@
     and comfortably hold thousands of sales records.
 */
 
-const DB_NAME = "pos-db";
+export const DB_NAME = "pos-db";
 const DB_VERSION = 1;
 
 let dbPromise = null;
@@ -142,6 +142,7 @@ const DEFAULT_SETTINGS = {
   storeAddress: "",
   taxRate: 0,
   currencySymbol: "BND$",
+  pinHash: null,
 };
 
 export async function getSettings() {

@@ -9,6 +9,9 @@
 import * as db from "./db.js";
 import { renderReceipt, printReceipt } from "./receipt.js";
 import { formatMoney, formatDateTime, downloadCsv, showToast } from "./utils.js";
+import { requireAuth, lock } from "./auth.js";
+
+document.getElementById("nav-lock-btn").addEventListener("click", lock);
 
 let sales = [];
 let settings = null;
@@ -120,4 +123,4 @@ function openSale(sale) {
   saleModal.hidden = false;
 }
 
-init();
+requireAuth().then(init);

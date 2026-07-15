@@ -13,12 +13,36 @@
   <link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
+  <!-- Authorization lock screen - covers the whole app until the correct PIN
+       is entered. Not just hidden by CSS: js/auth.js also blocks the page's
+       real data from loading until this resolves. -->
+  <div class="auth-overlay" id="auth-overlay">
+    <div class="auth-box">
+      <h1>🔒 POS Locked</h1>
+      <p id="auth-message">Checking...</p>
+      <form id="auth-form">
+        <div class="field">
+          <label for="auth-pin">PIN</label>
+          <input type="password" id="auth-pin" inputmode="numeric" autocomplete="off" required />
+        </div>
+        <div class="field" id="auth-confirm-field" hidden>
+          <label for="auth-pin-confirm">Confirm PIN</label>
+          <input type="password" id="auth-pin-confirm" inputmode="numeric" autocomplete="off" />
+        </div>
+        <p class="field-error" id="auth-error" hidden></p>
+        <button type="submit" class="btn btn--primary" style="width:100%;">Unlock</button>
+      </form>
+      <button type="button" class="auth-forgot" id="auth-forgot-btn">Forgot PIN?</button>
+    </div>
+  </div>
+
   <nav class="app-nav" aria-label="Main navigation">
     <span class="app-nav__brand">POS</span>
     <a class="app-nav__link" href="index.html">Checkout</a>
     <a class="app-nav__link" href="products.html">Products</a>
     <a class="app-nav__link" href="history.html">History</a>
     <a class="app-nav__link" href="settings.html" aria-current="page">Settings</a>
+    <button type="button" class="app-nav__link" id="nav-lock-btn">🔒 Lock</button>
   </nav>
 
   <main class="page" style="max-width: 560px;">
@@ -63,6 +87,29 @@
         <label class="btn" for="import-input" style="margin:0;">Import Backup (.json)</label>
         <input type="file" id="import-input" accept="application/json" class="visually-hidden" />
       </div>
+    </section>
+
+    <section class="card" style="margin-top: var(--space-lg);">
+      <h2>Security</h2>
+      <p class="text-muted">
+        This PIN is what keeps people you haven't authorized from using this app on this device.
+        Only share it with staff you trust.
+      </p>
+      <form id="change-pin-form">
+        <div class="field">
+          <label for="current-pin">Current PIN</label>
+          <input type="password" id="current-pin" inputmode="numeric" autocomplete="off" required />
+        </div>
+        <div class="field">
+          <label for="new-pin">New PIN</label>
+          <input type="password" id="new-pin" inputmode="numeric" autocomplete="off" required />
+        </div>
+        <div class="field">
+          <label for="new-pin-confirm">Confirm new PIN</label>
+          <input type="password" id="new-pin-confirm" inputmode="numeric" autocomplete="off" required />
+        </div>
+        <button type="submit" class="btn btn--primary">Change PIN</button>
+      </form>
     </section>
   </main>
 

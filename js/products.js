@@ -7,6 +7,9 @@
 
 import * as db from "./db.js";
 import { formatMoney, generateId, showToast } from "./utils.js";
+import { requireAuth, lock } from "./auth.js";
+
+document.getElementById("nav-lock-btn").addEventListener("click", lock);
 
 let products = [];
 let settings = null;
@@ -175,4 +178,4 @@ function escapeHtml(value) {
   return div.innerHTML;
 }
 
-init();
+requireAuth().then(init);
