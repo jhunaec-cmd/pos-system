@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Simple app icon: a rounded blue square with a white receipt/register
+       glyph. Kept as one vector file so it looks crisp at every size and
+       can be reused as the browser tab favicon and the PWA install icon. -->
+  <rect width="512" height="512" rx="96" fill="#2563eb" />
+
+  <!-- Receipt body -->
+  <rect x="146" y="96" width="220" height="320" rx="12" fill="#ffffff" />
+
+  <!-- Zig-zag torn bottom edge of the receipt -->
+  <path
+    d="M146 416 L166 400 L186 416 L206 400 L226 416 L246 400 L266 416 L286 400 L306 416 L326 400 L346 416 L366 400 L366 424 L146 424 Z"
+    fill="#ffffff"
+  />
+
+  <!-- Lines of text on the receipt -->
+  <rect x="176" y="140" width="160" height="16" rx="4" fill="#2563eb" />
+  <rect x="176" y="176" width="160" height="16" rx="4" fill="#93c5fd" />
+  <rect x="176" y="212" width="160" height="16" rx="4" fill="#93c5fd" />
+  <rect x="176" y="248" width="100" height="16" rx="4" fill="#93c5fd" />
+  <rect x="176" y="300" width="160" height="20" rx="4" fill="#16a34a" />
+</svg>

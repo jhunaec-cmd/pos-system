@@ -1,0 +1,40 @@
+/*
+  variables.css
+  --------------
+  All colours, spacing, and font sizes live here as CSS "custom properties"
+  (the --name: value; syntax). Every other stylesheet reads these instead of
+  hard-coding values, so changing a colour here updates the whole app.
+*/
+
+:root {
+  /* Brand colours */
+  --color-primary: #2563eb;      /* main buttons, links, active nav */
+  --color-primary-dark: #1d4ed8; /* hover/active state for primary buttons */
+  --color-success: #16a34a;      /* confirm / cash / positive totals */
+  --color-danger: #dc2626;       /* delete / remove / errors */
+  --color-warning: #d97706;      /* low stock warnings */
+
+  /* Neutral colours (backgrounds, text, borders) */
+  --color-bg: #f4f5f7;
+  --color-surface: #ffffff;
+  --color-border: #d9dce1;
+  --color-text: #1f2430;
+  --color-text-muted: #6b7280;
+
+  /* Spacing scale (used for margin/padding/gap so spacing stays consistent) */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+
+  /* Font sizes */
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.75rem;
+
+  /* Shared corner rounding + shadow so cards/buttons feel consistent */
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}

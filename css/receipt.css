@@ -1,0 +1,94 @@
+/*
+  receipt.css
+  -----------
+  Styles the printable receipt. It is shown on-screen inside a modal (styled
+  like a slip of paper), and has a @media print block that hides everything
+  else on the page so only the receipt prints - no nav bar, no buttons.
+*/
+
+.receipt {
+  font-family: "Courier New", Courier, monospace;
+  background: #fff;
+  color: #000;
+  width: 300px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: var(--space-md);
+  border: 1px dashed var(--color-border);
+}
+
+.receipt__header {
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+.receipt__store-name {
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+}
+
+.receipt__meta {
+  font-size: var(--font-size-sm);
+  margin: var(--space-xs) 0;
+}
+
+.receipt__divider {
+  border: none;
+  border-top: 1px dashed #000;
+  margin: var(--space-sm) 0;
+}
+
+.receipt__line {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.receipt__line-name {
+  flex: 1;
+}
+
+.receipt__totals-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+}
+
+.receipt__totals-row--grand {
+  font-weight: 700;
+  font-size: var(--font-size-md);
+}
+
+.receipt__footer {
+  text-align: center;
+  margin-top: var(--space-md);
+  font-size: var(--font-size-sm);
+}
+
+/* When the browser print dialog is used, hide everything except the
+   element marked [data-print-area]. This lets us reuse one receipt
+   template for both on-screen preview and the printed page. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  [data-print-area],
+  [data-print-area] * {
+    visibility: visible;
+  }
+
+  [data-print-area] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  .receipt {
+    border: none;
+    width: 100%;
+  }
+}

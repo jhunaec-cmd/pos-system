@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings - POS</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2563eb" />
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml" />
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <nav class="app-nav" aria-label="Main navigation">
+    <span class="app-nav__brand">POS</span>
+    <a class="app-nav__link" href="index.html">Checkout</a>
+    <a class="app-nav__link" href="products.html">Products</a>
+    <a class="app-nav__link" href="history.html">History</a>
+    <a class="app-nav__link" href="settings.html" aria-current="page">Settings</a>
+  </nav>
+
+  <main class="page" style="max-width: 560px;">
+    <h1>Settings</h1>
+
+    <section class="card" style="margin-bottom: var(--space-lg);">
+      <h2>Store Details</h2>
+      <form id="settings-form">
+        <div class="field">
+          <label for="store-name">Store name</label>
+          <input type="text" id="store-name" required />
+        </div>
+
+        <div class="field">
+          <label for="store-address">Store address (optional, shown on receipts)</label>
+          <input type="text" id="store-address" />
+        </div>
+
+        <div class="field">
+          <label for="tax-rate">Tax rate (%)</label>
+          <input type="number" id="tax-rate" min="0" max="100" step="0.01" required />
+        </div>
+
+        <div class="field">
+          <label for="currency-symbol">Currency symbol</label>
+          <input type="text" id="currency-symbol" required />
+        </div>
+
+        <button type="submit" class="btn btn--primary">Save Settings</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Backup &amp; Restore</h2>
+      <p class="text-muted">
+        Data is stored only on this device. Export a backup file regularly, or to move your
+        products and sales to another PC/tablet/phone.
+      </p>
+
+      <div style="display:flex; gap: var(--space-sm); flex-wrap: wrap;">
+        <button type="button" class="btn" id="export-btn">Export Backup (.json)</button>
+        <label class="btn" for="import-input" style="margin:0;">Import Backup (.json)</label>
+        <input type="file" id="import-input" accept="application/json" class="visually-hidden" />
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script type="module" src="js/sw-register.js"></script>
+  <script type="module" src="js/settings.js"></script>
+</body>
+</html>

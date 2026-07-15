@@ -1,0 +1,202 @@
+/*
+  pos.css
+  -------
+  Styles only used on the checkout screen (index.html): the product grid,
+  the cart panel, and the payment modal. Mobile-first: on small screens the
+  product grid and cart stack vertically; on wider screens they sit side by
+  side like a real till.
+*/
+
+.pos-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* --- Product search + grid --- */
+.pos-products__search {
+  margin-bottom: var(--space-md);
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-sm);
+}
+
+.product-tile {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-sm);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.product-tile:hover {
+  border-color: var(--color-primary);
+}
+
+.product-tile:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.product-tile__name {
+  font-weight: 600;
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+
+.product-tile__price {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.product-tile__stock {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* --- Cart panel --- */
+.cart {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.cart__lines {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 40vh;
+}
+
+.cart-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cart-line__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cart-line__name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cart-line__price {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.cart-line__qty {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.cart-line__qty input {
+  width: 2.5rem;
+  text-align: center;
+  padding: var(--space-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.cart-line__total {
+  min-width: 4.5rem;
+  text-align: right;
+  font-weight: 600;
+}
+
+.cart__totals {
+  border-top: 2px solid var(--color-border);
+  padding-top: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.cart__totals-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+}
+
+.cart__totals-row--grand {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.cart__actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.cart__actions .btn {
+  flex: 1;
+}
+
+/* --- Barcode scanner status pill --- */
+.scanner-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.scanner-status__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-success);
+}
+
+/* --- Payment method choices --- */
+.payment-methods {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.payment-methods .btn {
+  flex: 1;
+}
+
+.payment-methods .btn[aria-pressed="true"] {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+/* --- Wider screens: side-by-side till layout --- */
+@media (min-width: 900px) {
+  .pos-layout {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .pos-products {
+    flex: 2;
+  }
+
+  .pos-cart {
+    flex: 1;
+    position: sticky;
+    top: var(--space-md);
+  }
+
+  .cart__lines {
+    max-height: 50vh;
+  }
+}

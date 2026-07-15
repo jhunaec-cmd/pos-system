@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sales History - POS</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2563eb" />
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml" />
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/receipt.css" />
+</head>
+<body>
+  <nav class="app-nav" aria-label="Main navigation">
+    <span class="app-nav__brand">POS</span>
+    <a class="app-nav__link" href="index.html">Checkout</a>
+    <a class="app-nav__link" href="products.html">Products</a>
+    <a class="app-nav__link" href="history.html" aria-current="page">History</a>
+    <a class="app-nav__link" href="settings.html">Settings</a>
+  </nav>
+
+  <main class="page">
+    <h1>Sales History</h1>
+
+    <div style="display:flex; gap: var(--space-md); flex-wrap: wrap; margin-bottom: var(--space-lg);">
+      <div class="card" style="flex:1; min-width: 160px;">
+        <div class="text-muted">Today's Sales</div>
+        <div style="font-size: var(--font-size-xl); font-weight:700;" id="today-count">0</div>
+      </div>
+      <div class="card" style="flex:1; min-width: 160px;">
+        <div class="text-muted">Today's Total</div>
+        <div style="font-size: var(--font-size-xl); font-weight:700;" id="today-total">RM 0.00</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date &amp; Time</th>
+            <th>Receipt #</th>
+            <th class="text-right">Items</th>
+            <th class="text-right">Total</th>
+            <th>Payment</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="sales-table-body"></tbody>
+      </table>
+      <p class="empty-state" id="sales-empty" hidden>No sales recorded yet.</p>
+    </div>
+  </main>
+
+  <!-- Sale detail / reprint modal -->
+  <div class="modal-overlay" id="sale-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="sale-modal-title">
+      <h2 id="sale-modal-title" class="visually-hidden">Sale Receipt</h2>
+      <div id="receipt-container"></div>
+      <div class="modal__actions">
+        <button type="button" class="btn" id="close-sale-btn">Close</button>
+        <button type="button" class="btn btn--primary" id="print-sale-btn">Print</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script type="module" src="js/sw-register.js"></script>
+  <script type="module" src="js/history.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checkout - POS</title>
+
+  <!-- PWA install support: manifest describes the app (name, icon, colours)
+       so browsers can offer "Install app" on PC, tablet, and mobile. -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2563eb" />
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml" />
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/pos.css" />
+  <link rel="stylesheet" href="css/receipt.css" />
+</head>
+<body>
+  <nav class="app-nav" aria-label="Main navigation">
+    <span class="app-nav__brand">POS</span>
+    <a class="app-nav__link" href="index.html" aria-current="page">Checkout</a>
+    <a class="app-nav__link" href="products.html">Products</a>
+    <a class="app-nav__link" href="history.html">History</a>
+    <a class="app-nav__link" href="settings.html">Settings</a>
+  </nav>
+
+  <main class="page">
+    <div class="pos-layout">
+      <!-- Product search + grid -->
+      <section class="pos-products" aria-label="Products">
+        <div class="scanner-status">
+          <span class="scanner-status__dot" aria-hidden="true"></span>
+          Barcode scanner ready - scan an item any time
+        </div>
+
+        <div class="field pos-products__search">
+          <label for="product-search">Search products</label>
+          <input
+            type="search"
+            id="product-search"
+            placeholder="Type a name or SKU..."
+            autocomplete="off"
+          />
+        </div>
+
+        <div id="product-grid" class="product-grid" aria-live="polite">
+          <!-- Product tiles are inserted here by js/pos.js -->
+        </div>
+      </section>
+
+      <!-- Cart panel -->
+      <aside class="pos-cart" aria-label="Current sale">
+        <div class="card cart">
+          <h2>Current Sale</h2>
+
+          <div id="cart-lines" class="cart__lines">
+            <p class="empty-state" id="cart-empty">Cart is empty. Scan or tap a product to begin.</p>
+          </div>
+
+          <div class="cart__totals">
+            <div class="cart__totals-row">
+              <span>Subtotal</span><span id="cart-subtotal">RM 0.00</span>
+            </div>
+            <div class="cart__totals-row">
+              <span>Tax</span><span id="cart-tax">RM 0.00</span>
+            </div>
+            <div class="cart__totals-row cart__totals-row--grand">
+              <span>Total</span><span id="cart-total">RM 0.00</span>
+            </div>
+          </div>
+
+          <div class="cart__actions">
+            <button type="button" class="btn" id="clear-cart-btn">Clear</button>
+            <button type="button" class="btn btn--primary" id="charge-btn">Charge</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Payment modal -->
+  <div class="modal-overlay" id="payment-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+      <h2 id="payment-modal-title">Take Payment</h2>
+      <p>Total due: <strong id="payment-total">RM 0.00</strong></p>
+
+      <div class="payment-methods" role="group" aria-label="Payment method">
+        <button type="button" class="btn" data-method="Cash" aria-pressed="true">Cash</button>
+        <button type="button" class="btn" data-method="Card" aria-pressed="false">Card</button>
+        <button type="button" class="btn" data-method="E-wallet" aria-pressed="false">E-wallet</button>
+      </div>
+
+      <div class="field" id="cash-fields">
+        <label for="cash-tendered">Cash tendered</label>
+        <input type="number" id="cash-tendered" min="0" step="0.01" inputmode="decimal" />
+        <p>Change due: <strong id="change-due">RM 0.00</strong></p>
+      </div>
+
+      <div class="modal__actions">
+        <button type="button" class="btn" id="cancel-payment-btn">Cancel</button>
+        <button type="button" class="btn btn--success" id="confirm-payment-btn">Confirm Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Receipt modal -->
+  <div class="modal-overlay" id="receipt-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="receipt-modal-title">
+      <h2 id="receipt-modal-title" class="visually-hidden">Receipt</h2>
+      <div id="receipt-container"><!-- receipt.js fills this in --></div>
+      <div class="modal__actions">
+        <button type="button" class="btn" id="print-receipt-btn">Print</button>
+        <button type="button" class="btn btn--primary" id="new-sale-btn">New Sale</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script type="module" src="js/sw-register.js"></script>
+  <script type="module" src="js/pos.js"></script>
+</body>
+</html>
