@@ -13,6 +13,17 @@
   box-sizing: border-box;
 }
 
+/* The browser hides [hidden] elements by default, but only via a low-priority
+   built-in rule (display: none). Any of our own classes that set their own
+   "display" (like .field's display: flex) would otherwise silently override
+   that and make the element reappear even while .hidden = true in JS - which
+   is exactly what was happening to the Confirm PIN field. This makes
+   `hidden` always win, everywhere, regardless of what other classes are
+   applied to the same element. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
