@@ -11,6 +11,12 @@
       "label": "Staff Phone",
       "codeHash": "83d952142486ff745f17212401fe98cdb5953f811a40b8d4462e61f7cf2c199b",
       "active": true
+    },
+    {
+      "id": "d-jun-mobile",
+      "label": "Jun Mobile",
+      "codeHash": "90d021450258c0fdcaec39e75ec8a76df8d98db9da244f59e6da523703a59a49",
+      "active": true
     }
   ]
 }
