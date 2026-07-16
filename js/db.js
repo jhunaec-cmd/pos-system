@@ -155,6 +155,10 @@ const DEFAULT_SETTINGS = {
   autoLockMinutes: 0, // 0 = auto-lock disabled
   scannerSoundEnabled: true,
   scannerSensitivity: "medium", // "low" | "medium" | "high" - see js/scanner.js
+  cameraScanEnabled: true,
+  theme: "system", // "light" | "dark" | "system"
+  checkoutLayout: "grid", // "grid" | "list"
+  language: "en", // "en" | "ms" | "zh"
 };
 
 export async function getSettings() {

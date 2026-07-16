@@ -12,6 +12,11 @@
 import { requireAuth, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
 import { sha256, showToast } from "./utils.js";
+import { applyThemeEarly } from "./theme.js";
+import { applyLanguageEarly } from "./i18n.js";
+
+applyThemeEarly();
+applyLanguageEarly();
 
 const MASTER_AUTH_OPTIONS = { settingsKey: "masterPinHash", sessionKey: "admin-unlocked" };
 

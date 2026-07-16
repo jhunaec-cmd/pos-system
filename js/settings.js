@@ -10,7 +10,11 @@ import * as db from "./db.js";
 import { showToast } from "./utils.js";
 import { requireAuth, lock, changePin, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
+import { applyThemeEarly, applyTheme } from "./theme.js";
+import { applyLanguageEarly, applyLanguage } from "./i18n.js";
 
+applyThemeEarly();
+applyLanguageEarly();
 document.getElementById("nav-lock-btn").addEventListener("click", lock);
 
 const form = document.getElementById("settings-form");
@@ -27,6 +31,11 @@ const currentPinField = document.getElementById("current-pin");
 const newPinField = document.getElementById("new-pin");
 const newPinConfirmField = document.getElementById("new-pin-confirm");
 
+const themeField = document.getElementById("theme-select");
+const checkoutLayoutField = document.getElementById("checkout-layout-select");
+const languageField = document.getElementById("language-select");
+const saveAppearanceBtn = document.getElementById("save-appearance-btn");
+
 const autoLockField = document.getElementById("auto-lock-minutes");
 const saveAutoLockBtn = document.getElementById("save-auto-lock-btn");
 const scannerSoundField = document.getElementById("scanner-sound-enabled");
@@ -42,6 +51,9 @@ async function init() {
   autoLockField.value = String(settings.autoLockMinutes || 0);
   scannerSoundField.value = settings.scannerSoundEnabled ? "on" : "off";
   scannerSensitivityField.value = settings.scannerSensitivity || "medium";
+  themeField.value = settings.theme || "system";
+  checkoutLayoutField.value = settings.checkoutLayout || "grid";
+  languageField.value = settings.language || "en";
 
   form.addEventListener("submit", handleSave);
   exportBtn.addEventListener("click", handleExport);
@@ -49,6 +61,18 @@ async function init() {
   changePinForm.addEventListener("submit", handleChangePin);
   saveAutoLockBtn.addEventListener("click", handleSaveAutoLock);
   saveScannerSettingsBtn.addEventListener("click", handleSaveScannerSettings);
+  saveAppearanceBtn.addEventListener("click", handleSaveAppearance);
+}
+
+async function handleSaveAppearance() {
+  await db.saveSettings({
+    theme: themeField.value,
+    checkoutLayout: checkoutLayoutField.value,
+    language: languageField.value,
+  });
+  applyTheme(themeField.value);
+  applyLanguage(languageField.value);
+  showToast("Appearance saved");
 }
 
 async function handleSaveAutoLock() {

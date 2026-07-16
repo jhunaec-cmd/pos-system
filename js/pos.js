@@ -20,7 +20,11 @@ import { renderReceipt, printReceipt } from "./receipt.js";
 import { formatMoney, showToast, generateId, generateReceiptNumber, round2, playBeep, productTracksInventory, stockBadgeHtml } from "./utils.js";
 import { requireAuth, lock, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
+import { applyThemeEarly } from "./theme.js";
+import { applyLanguageEarly } from "./i18n.js";
 
+applyThemeEarly();
+applyLanguageEarly();
 document.getElementById("nav-lock-btn").addEventListener("click", lock);
 
 const cart = new Cart();
@@ -60,6 +64,7 @@ let stopCamera = null; // set while the camera modal is open
 async function init() {
   settings = await db.getSettings();
   products = await db.getAllProducts();
+  productGridEl.classList.toggle("product-grid--list", settings.checkoutLayout === "list");
   renderProductGrid(products);
   renderCart();
 
@@ -126,7 +131,9 @@ async function init() {
   printReceiptBtn.addEventListener("click", printReceipt);
   newSaleBtn.addEventListener("click", startNewSale);
 
-  if (isCameraScanSupported()) {
+  if (!settings.cameraScanEnabled) {
+    cameraScanBtn.hidden = true;
+  } else if (isCameraScanSupported()) {
     cameraScanBtn.addEventListener("click", openCameraModal);
   } else {
     cameraScanBtn.disabled = true;

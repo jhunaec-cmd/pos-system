@@ -61,11 +61,11 @@
 
   <nav class="app-nav" aria-label="Main navigation">
     <span class="app-nav__brand">POS</span>
-    <a class="app-nav__link" href="index.html" aria-current="page">Checkout</a>
-    <a class="app-nav__link" href="products.html">Products</a>
-    <a class="app-nav__link" href="history.html">History</a>
-    <a class="app-nav__link" href="settings.html">Settings</a>
-    <button type="button" class="app-nav__link" id="nav-lock-btn">🔒 Lock</button>
+    <a class="app-nav__link" href="index.html" aria-current="page" data-i18n="nav.checkout">Checkout</a>
+    <a class="app-nav__link" href="products.html" data-i18n="nav.products">Products</a>
+    <a class="app-nav__link" href="history.html" data-i18n="nav.history">History</a>
+    <a class="app-nav__link" href="settings.html" data-i18n="nav.settings">Settings</a>
+    <button type="button" class="app-nav__link" id="nav-lock-btn" data-i18n="nav.lock">🔒 Lock</button>
   </nav>
 
   <main class="page">
@@ -79,11 +79,12 @@
 
         <div class="pos-products__search-row">
           <div class="field pos-products__search">
-            <label for="product-search">Search products</label>
+            <label for="product-search" data-i18n="checkout.searchLabel">Search products</label>
             <input
               type="search"
               id="product-search"
               placeholder="Type a name or SKU..."
+              data-i18n-placeholder="checkout.searchPlaceholder"
               autocomplete="off"
             />
           </div>
@@ -100,27 +101,27 @@
       <!-- Cart panel -->
       <aside class="pos-cart" aria-label="Current sale">
         <div class="card cart">
-          <h2>Current Sale</h2>
+          <h2 data-i18n="checkout.currentSale">Current Sale</h2>
 
           <div id="cart-lines" class="cart__lines">
-            <p class="empty-state" id="cart-empty">Cart is empty. Scan or tap a product to begin.</p>
+            <p class="empty-state" id="cart-empty" data-i18n="checkout.cartEmpty">Cart is empty. Scan or tap a product to begin.</p>
           </div>
 
           <div class="cart__totals">
             <div class="cart__totals-row">
-              <span>Subtotal</span><span id="cart-subtotal">RM 0.00</span>
+              <span data-i18n="checkout.subtotal">Subtotal</span><span id="cart-subtotal">RM 0.00</span>
             </div>
             <div class="cart__totals-row">
-              <span>Tax</span><span id="cart-tax">RM 0.00</span>
+              <span data-i18n="checkout.tax">Tax</span><span id="cart-tax">RM 0.00</span>
             </div>
             <div class="cart__totals-row cart__totals-row--grand">
-              <span>Total</span><span id="cart-total">RM 0.00</span>
+              <span data-i18n="checkout.total">Total</span><span id="cart-total">RM 0.00</span>
             </div>
           </div>
 
           <div class="cart__actions">
-            <button type="button" class="btn" id="clear-cart-btn">Clear</button>
-            <button type="button" class="btn btn--primary" id="charge-btn">Charge</button>
+            <button type="button" class="btn" id="clear-cart-btn" data-i18n="checkout.clear">Clear</button>
+            <button type="button" class="btn btn--primary" id="charge-btn" data-i18n="checkout.charge">Charge</button>
           </div>
         </div>
       </aside>

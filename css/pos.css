@@ -40,6 +40,31 @@
   gap: var(--space-sm);
 }
 
+/* List layout (Settings > Appearance > Home screen layout): one column,
+   rows instead of square tiles - the photo sits beside the text. */
+.product-grid--list {
+  grid-template-columns: 1fr;
+}
+
+.product-grid--list .product-tile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.product-grid--list .product-tile__image {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+.product-grid--list .product-tile__name,
+.product-grid--list .product-tile__price,
+.product-grid--list .stock-badge {
+  margin-bottom: 0;
+}
+
 .product-tile {
   background: var(--color-surface);
   border: 1px solid var(--color-border);

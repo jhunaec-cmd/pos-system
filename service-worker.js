@@ -11,7 +11,7 @@
   file, so returning users get the new version instead of a stale cache.
 */
 
-const CACHE_NAME = "pos-cache-v17";
+const CACHE_NAME = "pos-cache-v18";
 
 const APP_SHELL_FILES = [
   "./",
@@ -38,6 +38,8 @@ const APP_SHELL_FILES = [
   "./js/history.js",
   "./js/settings.js",
   "./js/admin.js",
+  "./js/theme.js",
+  "./js/i18n.js",
   "./js/sw-register.js",
   "./assets/icons/icon.svg",
   "./assets/icons/icon-192.png",

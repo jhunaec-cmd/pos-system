@@ -11,7 +11,11 @@ import { renderReceipt, printReceipt } from "./receipt.js";
 import { formatMoney, formatDateTime, downloadCsv, showToast, sha256 } from "./utils.js";
 import { requireAuth, lock, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
+import { applyThemeEarly } from "./theme.js";
+import { applyLanguageEarly } from "./i18n.js";
 
+applyThemeEarly();
+applyLanguageEarly();
 document.getElementById("nav-lock-btn").addEventListener("click", lock);
 
 let sales = [];

@@ -57,21 +57,21 @@
 
   <nav class="app-nav" aria-label="Main navigation">
     <span class="app-nav__brand">POS</span>
-    <a class="app-nav__link" href="index.html">Checkout</a>
-    <a class="app-nav__link" href="products.html" aria-current="page">Products</a>
-    <a class="app-nav__link" href="history.html">History</a>
-    <a class="app-nav__link" href="settings.html">Settings</a>
-    <button type="button" class="app-nav__link" id="nav-lock-btn">🔒 Lock</button>
+    <a class="app-nav__link" href="index.html" data-i18n="nav.checkout">Checkout</a>
+    <a class="app-nav__link" href="products.html" aria-current="page" data-i18n="nav.products">Products</a>
+    <a class="app-nav__link" href="history.html" data-i18n="nav.history">History</a>
+    <a class="app-nav__link" href="settings.html" data-i18n="nav.settings">Settings</a>
+    <button type="button" class="app-nav__link" id="nav-lock-btn" data-i18n="nav.lock">🔒 Lock</button>
   </nav>
 
   <main class="page">
     <div style="display:flex; align-items:center; gap: var(--space-md); flex-wrap: wrap; margin-bottom: var(--space-md);">
-      <h1 style="margin:0;">Products</h1>
-      <button type="button" class="btn btn--primary" id="add-product-btn" style="margin-left:auto;">+ Add Product</button>
+      <h1 style="margin:0;" data-i18n="products.heading">Products</h1>
+      <button type="button" class="btn btn--primary" id="add-product-btn" style="margin-left:auto;" data-i18n="products.addProduct">+ Add Product</button>
     </div>
 
     <div class="field" style="max-width: 320px;">
-      <label for="product-search">Search</label>
+      <label for="product-search" data-i18n="products.searchLabel">Search</label>
       <input type="search" id="product-search" placeholder="Search by name or barcode..." autocomplete="off" />
     </div>
 

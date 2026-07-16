@@ -58,29 +58,29 @@
 
   <nav class="app-nav" aria-label="Main navigation">
     <span class="app-nav__brand">POS</span>
-    <a class="app-nav__link" href="index.html">Checkout</a>
-    <a class="app-nav__link" href="products.html">Products</a>
-    <a class="app-nav__link" href="history.html" aria-current="page">History</a>
-    <a class="app-nav__link" href="settings.html">Settings</a>
-    <button type="button" class="app-nav__link" id="nav-lock-btn">🔒 Lock</button>
+    <a class="app-nav__link" href="index.html" data-i18n="nav.checkout">Checkout</a>
+    <a class="app-nav__link" href="products.html" data-i18n="nav.products">Products</a>
+    <a class="app-nav__link" href="history.html" aria-current="page" data-i18n="nav.history">History</a>
+    <a class="app-nav__link" href="settings.html" data-i18n="nav.settings">Settings</a>
+    <button type="button" class="app-nav__link" id="nav-lock-btn" data-i18n="nav.lock">🔒 Lock</button>
   </nav>
 
   <main class="page">
     <div style="display:flex; align-items:center; gap: var(--space-md); flex-wrap: wrap;">
-      <h1 style="margin:0;">Sales History</h1>
+      <h1 style="margin:0;" data-i18n="history.heading">Sales History</h1>
       <div style="display:flex; gap: var(--space-sm); margin-left:auto; flex-wrap: wrap;">
-        <button type="button" class="btn" id="export-csv-btn">Export to Excel (CSV)</button>
-        <button type="button" class="btn btn--danger" id="reset-history-btn">Reset History</button>
+        <button type="button" class="btn" id="export-csv-btn" data-i18n="history.exportCsv">Export to Excel (CSV)</button>
+        <button type="button" class="btn btn--danger" id="reset-history-btn" data-i18n="history.resetHistory">Reset History</button>
       </div>
     </div>
 
     <div style="display:flex; gap: var(--space-md); flex-wrap: wrap; margin: var(--space-md) 0 var(--space-lg);">
       <div class="card" style="flex:1; min-width: 160px;">
-        <div class="text-muted">Today's Sales</div>
+        <div class="text-muted" data-i18n="history.todaySales">Today's Sales</div>
         <div style="font-size: var(--font-size-xl); font-weight:700;" id="today-count">0</div>
       </div>
       <div class="card" style="flex:1; min-width: 160px;">
-        <div class="text-muted">Today's Total</div>
+        <div class="text-muted" data-i18n="history.todayTotal">Today's Total</div>
         <div style="font-size: var(--font-size-xl); font-weight:700;" id="today-total">RM 0.00</div>
       </div>
     </div>

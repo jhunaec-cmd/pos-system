@@ -10,7 +10,11 @@ import { formatMoney, generateId, showToast, playBeep, sha256, resizeImageToData
 import { requireAuth, lock, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
 import { isCameraScanSupported, startCameraScanner } from "./camera-scanner.js";
+import { applyThemeEarly } from "./theme.js";
+import { applyLanguageEarly } from "./i18n.js";
 
+applyThemeEarly();
+applyLanguageEarly();
 document.getElementById("nav-lock-btn").addEventListener("click", lock);
 
 let products = [];
@@ -93,7 +97,9 @@ async function init() {
     }
   });
 
-  if (isCameraScanSupported()) {
+  if (!settings.cameraScanEnabled) {
+    scanBarcodeBtn.hidden = true;
+  } else if (isCameraScanSupported()) {
     scanBarcodeBtn.addEventListener("click", openCameraModal);
   } else {
     scanBarcodeBtn.disabled = true;

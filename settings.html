@@ -57,15 +57,15 @@
 
   <nav class="app-nav" aria-label="Main navigation">
     <span class="app-nav__brand">POS</span>
-    <a class="app-nav__link" href="index.html">Checkout</a>
-    <a class="app-nav__link" href="products.html">Products</a>
-    <a class="app-nav__link" href="history.html">History</a>
-    <a class="app-nav__link" href="settings.html" aria-current="page">Settings</a>
-    <button type="button" class="app-nav__link" id="nav-lock-btn">🔒 Lock</button>
+    <a class="app-nav__link" href="index.html" data-i18n="nav.checkout">Checkout</a>
+    <a class="app-nav__link" href="products.html" data-i18n="nav.products">Products</a>
+    <a class="app-nav__link" href="history.html" data-i18n="nav.history">History</a>
+    <a class="app-nav__link" href="settings.html" aria-current="page" data-i18n="nav.settings">Settings</a>
+    <button type="button" class="app-nav__link" id="nav-lock-btn" data-i18n="nav.lock">🔒 Lock</button>
   </nav>
 
   <main class="page" style="max-width: 560px;">
-    <h1>Settings</h1>
+    <h1 data-i18n="settings.heading">Settings</h1>
 
     <section class="card" style="margin-bottom: var(--space-lg);">
       <h2>Store Details</h2>
@@ -92,6 +92,38 @@
 
         <button type="submit" class="btn btn--primary">Save Settings</button>
       </form>
+    </section>
+
+    <section class="card" style="margin-bottom: var(--space-lg);">
+      <h2>Appearance &amp; Language</h2>
+
+      <div class="field">
+        <label for="theme-select">Theme</label>
+        <select id="theme-select">
+          <option value="system">System (match device)</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="checkout-layout-select">Home screen layout</label>
+        <select id="checkout-layout-select">
+          <option value="grid">Grid</option>
+          <option value="list">List</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="language-select">Language</label>
+        <select id="language-select">
+          <option value="en">English</option>
+          <option value="ms">Bahasa Melayu</option>
+          <option value="zh">中文 (简体)</option>
+        </select>
+      </div>
+
+      <button type="button" class="btn btn--primary" id="save-appearance-btn">Save Appearance</button>
     </section>
 
     <section class="card">
