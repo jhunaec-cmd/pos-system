@@ -17,7 +17,7 @@ import { Cart } from "./cart.js";
 import { initScanner } from "./scanner.js";
 import { isCameraScanSupported, startCameraScanner } from "./camera-scanner.js";
 import { renderReceipt, printReceipt } from "./receipt.js";
-import { formatMoney, showToast, generateId, generateReceiptNumber, round2, playBeep } from "./utils.js";
+import { formatMoney, showToast, generateId, generateReceiptNumber, round2, playBeep, productTracksInventory, stockBadgeHtml } from "./utils.js";
 import { requireAuth, lock, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
 
@@ -145,7 +145,7 @@ function renderProductGrid(list) {
 
   productGridEl.innerHTML = list
     .map((product) => {
-      const outOfStock = typeof product.stock === "number" && product.stock <= 0;
+      const outOfStock = productTracksInventory(product) && product.stock <= 0;
       return `
         <button
           type="button"
@@ -155,19 +155,15 @@ function renderProductGrid(list) {
         >
           ${product.image ? `<img class="product-tile__image" src="${product.image}" alt="" />` : ""}
           <span class="product-tile__name">${escapeHtml(product.name)}</span>
-          <span class="product-tile__price">${formatMoney(product.price, settings.currencySymbol)}</span>
-          ${
-            typeof product.stock === "number"
-              ? `<span class="product-tile__stock">${outOfStock ? "Out of stock" : `Stock: ${product.stock}`}</span>`
-              : ""
-          }
+          <span class="product-tile__price">${formatMoney(product.price, settings.currencySymbol)}${product.soldBy === "weight" ? "/kg" : ""}</span>
+          ${stockBadgeHtml(product)}
         </button>`;
     })
     .join("");
 }
 
 function addToCart(product) {
-  if (typeof product.stock === "number" && product.stock <= 0) {
+  if (productTracksInventory(product) && product.stock <= 0) {
     showToast(`${product.name} is out of stock`);
     return;
   }

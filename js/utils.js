@@ -13,6 +13,46 @@ export function formatMoney(amount, currencySymbol = "RM") {
   return `${currencySymbol} ${value.toFixed(2)}`;
 }
 
+/** Whether a product has inventory tracking turned on. Prefers the explicit
+ * `trackInventory` flag; falls back to "does it have a stock number" for
+ * products saved before that flag existed, so older data keeps working. */
+export function productTracksInventory(product) {
+  return typeof product.trackInventory === "boolean"
+    ? product.trackInventory
+    : typeof product.stock === "number";
+}
+
+/** Classifies a product's stock level so the UI can show a color/shape
+ * badge: "not-tracked" (inventory off), "out" (0 or less), "low" (at or
+ * under the low-stock threshold), or "in-stock". */
+export function getStockStatus(product) {
+  if (!productTracksInventory(product)) return "not-tracked";
+  const stock = typeof product.stock === "number" ? product.stock : 0;
+  const lowStock = typeof product.lowStock === "number" ? product.lowStock : 0;
+  if (stock <= 0) return "out";
+  if (lowStock > 0 && stock <= lowStock) return "low";
+  return "in-stock";
+}
+
+/** Builds the small stock-status badge markup (a colored + shaped dot plus
+ * a label) shared by the product table and the checkout product grid.
+ * Uses both color AND shape for each status, not color alone, so it's
+ * still readable for colorblind users. Returns "" when untracked, since
+ * there's nothing meaningful to show. */
+export function stockBadgeHtml(product) {
+  const status = getStockStatus(product);
+  if (status === "not-tracked") return "";
+
+  const labels = {
+    "in-stock": "In Stock",
+    low: "Low Stock",
+    out: "Out of Stock",
+  };
+  const stock = typeof product.stock === "number" ? product.stock : 0;
+
+  return `<span class="stock-badge stock-badge--${status}"><span class="stock-badge__shape" aria-hidden="true"></span>${labels[status]} (${stock})</span>`;
+}
+
 /** Formats a timestamp (ms since epoch) as a readable local date + time. */
 export function formatDateTime(timestamp) {
   return new Date(timestamp).toLocaleString(undefined, {

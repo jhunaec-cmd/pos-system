@@ -6,7 +6,7 @@
 */
 
 import * as db from "./db.js";
-import { formatMoney, generateId, showToast, playBeep, sha256, resizeImageToDataUrl } from "./utils.js";
+import { formatMoney, generateId, showToast, playBeep, sha256, resizeImageToDataUrl, stockBadgeHtml, productTracksInventory } from "./utils.js";
 import { requireAuth, lock, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
 import { isCameraScanSupported, startCameraScanner } from "./camera-scanner.js";
@@ -27,9 +27,15 @@ const form = document.getElementById("product-form");
 const idField = document.getElementById("product-id");
 const nameField = document.getElementById("product-name");
 const barcodeField = document.getElementById("product-barcode");
+const skuField = document.getElementById("product-sku");
+const soldByField = document.getElementById("product-sold-by");
+const priceLabel = document.getElementById("product-price-label");
 const priceField = document.getElementById("product-price");
 const categoryField = document.getElementById("product-category");
+const trackInventoryField = document.getElementById("product-track-inventory");
+const inventoryFields = document.getElementById("inventory-fields");
 const stockField = document.getElementById("product-stock");
+const lowStockField = document.getElementById("product-low-stock");
 const cancelBtn = document.getElementById("cancel-product-btn");
 
 const imageInput = document.getElementById("product-image-input");
@@ -100,6 +106,15 @@ async function init() {
 
   imageInput.addEventListener("change", handleImageSelected);
   removeImageBtn.addEventListener("click", clearProductImage);
+
+  trackInventoryField.addEventListener("change", () => {
+    inventoryFields.hidden = !trackInventoryField.checked;
+  });
+  soldByField.addEventListener("change", updatePriceLabel);
+}
+
+function updatePriceLabel() {
+  priceLabel.textContent = soldByField.value === "weight" ? "Price (per kg)" : "Price (per item)";
 }
 
 /* ---------- Product photo ---------- */
@@ -243,9 +258,10 @@ function renderTable(list) {
         }</td>
         <td>${escapeHtml(product.name)}</td>
         <td>${escapeHtml(product.barcode)}</td>
-        <td class="text-right">${formatMoney(product.price, settings.currencySymbol)}</td>
+        <td>${escapeHtml(product.sku || "")}</td>
+        <td class="text-right">${formatMoney(product.price, settings.currencySymbol)}${product.soldBy === "weight" ? "/kg" : ""}</td>
         <td>${escapeHtml(product.category || "")}</td>
-        <td class="text-right">${typeof product.stock === "number" ? product.stock : "-"}</td>
+        <td>${stockBadgeHtml(product) || `<span class="text-muted">Not tracked</span>`}</td>
         <td class="text-right">
           <button type="button" class="btn btn--icon" data-action="edit">Edit</button>
           <button type="button" class="btn btn--icon btn--danger" data-action="delete">Delete</button>
@@ -265,9 +281,17 @@ function openModal(product = null) {
     idField.value = product.id;
     nameField.value = product.name;
     barcodeField.value = product.barcode;
+    skuField.value = product.sku || "";
+    soldByField.value = product.soldBy === "weight" ? "weight" : "each";
     priceField.value = product.price;
     categoryField.value = product.category || "";
+
+    const tracks = productTracksInventory(product);
+    trackInventoryField.checked = tracks;
+    inventoryFields.hidden = !tracks;
     stockField.value = typeof product.stock === "number" ? product.stock : "";
+    lowStockField.value = typeof product.lowStock === "number" ? product.lowStock : "";
+
     if (product.image) {
       currentProductImage = product.image;
       showImagePreview(product.image);
@@ -275,8 +299,12 @@ function openModal(product = null) {
   } else {
     modalTitle.textContent = "Add Product";
     idField.value = "";
+    soldByField.value = "each";
+    trackInventoryField.checked = false;
+    inventoryFields.hidden = true;
   }
 
+  updatePriceLabel();
   modal.hidden = false;
   nameField.focus();
 }
@@ -291,8 +319,10 @@ async function handleSubmit(event) {
 
   const name = nameField.value.trim();
   const barcode = barcodeField.value.trim();
+  const sku = skuField.value.trim();
   const price = Number(priceField.value);
   const stockRaw = stockField.value.trim();
+  const lowStockRaw = lowStockField.value.trim();
   const currentId = idField.value || null;
 
   let hasError = false;
@@ -307,6 +337,12 @@ async function handleSubmit(event) {
     hasError = true;
   }
 
+  const skuTaken = sku && products.some((p) => p.sku === sku && p.id !== currentId);
+  if (skuTaken) {
+    showError("product-sku-error");
+    hasError = true;
+  }
+
   if (!Number.isFinite(price) || price <= 0) {
     showError("product-price-error");
     hasError = true;
@@ -314,13 +350,19 @@ async function handleSubmit(event) {
 
   if (hasError) return;
 
+  const trackInventory = trackInventoryField.checked;
+
   const product = {
     id: currentId || generateId(),
     name,
     barcode,
+    sku,
+    soldBy: soldByField.value === "weight" ? "weight" : "each",
     price,
     category: categoryField.value.trim(),
-    stock: stockRaw === "" ? null : Number(stockRaw),
+    trackInventory,
+    stock: trackInventory && stockRaw !== "" ? Number(stockRaw) : trackInventory ? 0 : null,
+    lowStock: trackInventory && lowStockRaw !== "" ? Number(lowStockRaw) : null,
     image: currentProductImage,
   };
 

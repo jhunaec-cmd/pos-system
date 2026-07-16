@@ -78,12 +78,6 @@
   font-weight: 700;
 }
 
-.product-tile__stock {
-  display: block;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-}
-
 /* --- Cart panel --- */
 .cart {
   display: flex;

@@ -7,11 +7,11 @@
   checkout page (pos.js) is the one that draws it on screen.
 */
 
-import { round2 } from "./utils.js";
+import { round2, productTracksInventory } from "./utils.js";
 
 export class Cart {
   constructor() {
-    /** @type {{productId: string, name: string, price: number, qty: number, maxStock: number|null}[]} */
+    /** @type {{productId: string, name: string, price: number, qty: number, maxStock: number|null, soldByWeight: boolean}[]} */
     this.lines = [];
   }
 
@@ -19,17 +19,19 @@ export class Cart {
    * in the cart. `maxStock` is null when the product doesn't track stock. */
   addItem(product, qty = 1) {
     const existing = this.lines.find((line) => line.productId === product.id);
-    const maxStock = typeof product.stock === "number" ? product.stock : null;
+    const maxStock = productTracksInventory(product) ? product.stock ?? 0 : null;
+    const soldByWeight = product.soldBy === "weight";
 
     if (existing) {
-      existing.qty = this._clampQty(existing.qty + qty, maxStock);
+      existing.qty = this._clampQty(existing.qty + qty, maxStock, soldByWeight);
     } else {
       this.lines.push({
         productId: product.id,
         name: product.name,
         price: product.price,
-        qty: this._clampQty(qty, maxStock),
+        qty: this._clampQty(qty, maxStock, soldByWeight),
         maxStock,
+        soldByWeight,
       });
     }
   }
@@ -38,14 +40,13 @@ export class Cart {
     const line = this.lines.find((l) => l.productId === productId);
     if (!line) return;
 
-    // Zero or below means "take it out of the cart", not "clamp to 1" -
-    // otherwise the decrease button would get stuck at 1 forever.
-    if (Math.floor(qty) <= 0) {
+    // Zero or below means "take it out of the cart".
+    if (!(qty > 0)) {
       this.removeItem(productId);
       return;
     }
 
-    line.qty = this._clampQty(qty, line.maxStock);
+    line.qty = this._clampQty(qty, line.maxStock, line.soldByWeight);
   }
 
   removeItem(productId) {
@@ -60,10 +61,14 @@ export class Cart {
     return this.lines.length === 0;
   }
 
-  /** Keeps quantity at least 1, and no more than what's in stock (when the
-   * product tracks stock). */
-  _clampQty(qty, maxStock) {
-    const safeQty = Math.max(1, Math.floor(qty) || 1);
+  /** Keeps quantity at least a small positive amount, and no more than
+   * what's in stock (when the product tracks stock). Items sold by weight
+   * (e.g. kg) can have fractional quantities like 0.5; items sold "each"
+   * are always whole numbers. */
+  _clampQty(qty, maxStock, soldByWeight) {
+    const minQty = soldByWeight ? 0.001 : 1;
+    let safeQty = soldByWeight ? round2(qty) : Math.floor(qty) || 1;
+    safeQty = Math.max(minQty, safeQty);
     return maxStock === null ? safeQty : Math.min(safeQty, Math.max(maxStock, 0));
   }
 
