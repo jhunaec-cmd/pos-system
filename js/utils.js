@@ -27,6 +27,46 @@ export function generateId() {
   return crypto.randomUUID();
 }
 
+/** Shrinks an uploaded/captured product photo down to a small square-ish
+ * JPEG and returns it as a data URL string (e.g. "data:image/jpeg;base64,...").
+ * Storing a data URL (rather than the raw file/Blob) keeps product photos
+ * plain strings, so they save into IndexedDB and round-trip through the
+ * JSON backup export/import exactly like every other field - no special
+ * cases needed elsewhere. Shrinking first keeps a phone's multi-megabyte
+ * photo from bloating this device's local storage. */
+export function resizeImageToDataUrl(file, maxDimension = 300, quality = 0.8) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const img = new Image();
+
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > height && width > maxDimension) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else if (height > maxDimension) {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+
+      img.onerror = () => reject(new Error("Could not read that image file."));
+      img.src = reader.result;
+    };
+
+    reader.onerror = () => reject(new Error("Could not read that file."));
+    reader.readAsDataURL(file);
+  });
+}
+
 /** Builds a short, human-friendly receipt number from the current time,
  * e.g. "R241231-8842". Not guaranteed globally unique, but good enough for
  * a receipt printed to a customer, and unique per device in practice. */

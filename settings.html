@@ -149,9 +149,15 @@
 
     <section class="card" style="margin-top: var(--space-lg);">
       <h2>Scanning</h2>
-      <p class="text-muted">
-        The scanner sound on/off button is on the Checkout page, next to the scanner status.
-      </p>
+
+      <div class="field">
+        <label for="scanner-sound-enabled">Scanner sound</label>
+        <select id="scanner-sound-enabled">
+          <option value="on">On - beep on every successful scan</option>
+          <option value="off">Off</option>
+        </select>
+      </div>
+
       <div class="field">
         <label for="scanner-sensitivity">Scanner sensitivity</label>
         <select id="scanner-sensitivity">
@@ -164,7 +170,7 @@
           accidentally triggers a "scan", lower it.
         </span>
       </div>
-      <button type="button" class="btn btn--primary" id="save-scanner-settings-btn">Save Scanner Setting</button>
+      <button type="button" class="btn btn--primary" id="save-scanner-settings-btn">Save Scanner Settings</button>
     </section>
   </main>
 

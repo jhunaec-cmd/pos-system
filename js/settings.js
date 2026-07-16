@@ -29,6 +29,7 @@ const newPinConfirmField = document.getElementById("new-pin-confirm");
 
 const autoLockField = document.getElementById("auto-lock-minutes");
 const saveAutoLockBtn = document.getElementById("save-auto-lock-btn");
+const scannerSoundField = document.getElementById("scanner-sound-enabled");
 const scannerSensitivityField = document.getElementById("scanner-sensitivity");
 const saveScannerSettingsBtn = document.getElementById("save-scanner-settings-btn");
 
@@ -39,6 +40,7 @@ async function init() {
   taxRateField.value = settings.taxRate;
   currencySymbolField.value = settings.currencySymbol;
   autoLockField.value = String(settings.autoLockMinutes || 0);
+  scannerSoundField.value = settings.scannerSoundEnabled ? "on" : "off";
   scannerSensitivityField.value = settings.scannerSensitivity || "medium";
 
   form.addEventListener("submit", handleSave);
@@ -55,8 +57,11 @@ async function handleSaveAutoLock() {
 }
 
 async function handleSaveScannerSettings() {
-  await db.saveSettings({ scannerSensitivity: scannerSensitivityField.value });
-  showToast("Scanner setting saved");
+  await db.saveSettings({
+    scannerSoundEnabled: scannerSoundField.value === "on",
+    scannerSensitivity: scannerSensitivityField.value,
+  });
+  showToast("Scanner settings saved");
 }
 
 async function handleChangePin(event) {

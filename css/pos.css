@@ -59,6 +59,14 @@
   cursor: not-allowed;
 }
 
+.product-tile__image {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--radius);
+  margin-bottom: var(--space-xs);
+}
+
 .product-tile__name {
   font-weight: 600;
   display: block;
@@ -169,11 +177,6 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   margin-bottom: var(--space-sm);
-}
-
-#scanner-sound-btn {
-  font-size: var(--font-size-sm);
-  white-space: nowrap;
 }
 
 .scanner-status__dot {

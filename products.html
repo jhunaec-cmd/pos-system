@@ -79,6 +79,7 @@
       <table class="table">
         <thead>
           <tr>
+            <th>Photo</th>
             <th>Name</th>
             <th>Barcode</th>
             <th class="text-right">Price</th>
@@ -106,6 +107,15 @@
           <label for="product-name">Name</label>
           <input type="text" id="product-name" required />
           <span class="field-error" id="product-name-error" hidden>Name is required.</span>
+        </div>
+
+        <div class="field">
+          <label for="product-image-input">Product photo (optional)</label>
+          <input type="file" id="product-image-input" accept="image/*" />
+          <div id="product-image-preview-wrap" style="display:flex; align-items:center; gap: var(--space-sm); margin-top: var(--space-sm);" hidden>
+            <img id="product-image-preview" alt="Product photo preview" style="width:80px; height:80px; object-fit:cover; border-radius: var(--radius); border:1px solid var(--color-border);" />
+            <button type="button" class="btn btn--icon" id="remove-product-image-btn">Remove Photo</button>
+          </div>
         </div>
 
         <div class="field">

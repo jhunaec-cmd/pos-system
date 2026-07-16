@@ -6,7 +6,7 @@
 */
 
 import * as db from "./db.js";
-import { formatMoney, generateId, showToast, playBeep, sha256 } from "./utils.js";
+import { formatMoney, generateId, showToast, playBeep, sha256, resizeImageToDataUrl } from "./utils.js";
 import { requireAuth, lock, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
 import { isCameraScanSupported, startCameraScanner } from "./camera-scanner.js";
@@ -31,6 +31,12 @@ const priceField = document.getElementById("product-price");
 const categoryField = document.getElementById("product-category");
 const stockField = document.getElementById("product-stock");
 const cancelBtn = document.getElementById("cancel-product-btn");
+
+const imageInput = document.getElementById("product-image-input");
+const imagePreviewWrap = document.getElementById("product-image-preview-wrap");
+const imagePreview = document.getElementById("product-image-preview");
+const removeImageBtn = document.getElementById("remove-product-image-btn");
+let currentProductImage = null; // data URL string, or null if no photo set
 
 const scanBarcodeBtn = document.getElementById("scan-barcode-btn");
 const cameraModal = document.getElementById("camera-modal");
@@ -91,6 +97,35 @@ async function init() {
 
   cancelEditPwBtn.addEventListener("click", closeEditPasswordModal);
   editPwForm.addEventListener("submit", handleEditPasswordSubmit);
+
+  imageInput.addEventListener("change", handleImageSelected);
+  removeImageBtn.addEventListener("click", clearProductImage);
+}
+
+/* ---------- Product photo ---------- */
+
+async function handleImageSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    currentProductImage = await resizeImageToDataUrl(file);
+    showImagePreview(currentProductImage);
+  } catch (error) {
+    showToast(error.message || "Could not read that image file");
+  }
+}
+
+function clearProductImage() {
+  currentProductImage = null;
+  imageInput.value = "";
+  imagePreviewWrap.hidden = true;
+  imagePreview.src = "";
+}
+
+function showImagePreview(dataUrl) {
+  imagePreview.src = dataUrl;
+  imagePreviewWrap.hidden = false;
 }
 
 /* ---------- Edit/Delete password gate ---------- */
@@ -201,6 +236,11 @@ function renderTable(list) {
     .map(
       (product) => `
       <tr data-product-id="${product.id}">
+        <td>${
+          product.image
+            ? `<img src="${product.image}" alt="" style="width:40px; height:40px; object-fit:cover; border-radius: var(--radius);" />`
+            : `<span class="text-muted">-</span>`
+        }</td>
         <td>${escapeHtml(product.name)}</td>
         <td>${escapeHtml(product.barcode)}</td>
         <td class="text-right">${formatMoney(product.price, settings.currencySymbol)}</td>
@@ -218,6 +258,7 @@ function renderTable(list) {
 function openModal(product = null) {
   form.reset();
   clearErrors();
+  clearProductImage();
 
   if (product) {
     modalTitle.textContent = "Edit Product";
@@ -227,6 +268,10 @@ function openModal(product = null) {
     priceField.value = product.price;
     categoryField.value = product.category || "";
     stockField.value = typeof product.stock === "number" ? product.stock : "";
+    if (product.image) {
+      currentProductImage = product.image;
+      showImagePreview(product.image);
+    }
   } else {
     modalTitle.textContent = "Add Product";
     idField.value = "";
@@ -276,6 +321,7 @@ async function handleSubmit(event) {
     price,
     category: categoryField.value.trim(),
     stock: stockRaw === "" ? null : Number(stockRaw),
+    image: currentProductImage,
   };
 
   await db.saveProduct(product);

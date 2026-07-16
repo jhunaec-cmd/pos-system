@@ -51,8 +51,6 @@ const receiptContainer = document.getElementById("receipt-container");
 const printReceiptBtn = document.getElementById("print-receipt-btn");
 const newSaleBtn = document.getElementById("new-sale-btn");
 
-const scannerSoundBtn = document.getElementById("scanner-sound-btn");
-
 const cameraScanBtn = document.getElementById("camera-scan-btn");
 const cameraModal = document.getElementById("camera-modal");
 const cameraVideo = document.getElementById("camera-video");
@@ -66,13 +64,6 @@ async function init() {
   renderCart();
 
   initScanner(handleScan, settings.scannerSensitivity);
-
-  updateScannerSoundBtn();
-  scannerSoundBtn.addEventListener("click", async () => {
-    settings.scannerSoundEnabled = !settings.scannerSoundEnabled;
-    await db.saveSettings({ scannerSoundEnabled: settings.scannerSoundEnabled });
-    updateScannerSoundBtn();
-  });
 
   searchInput.addEventListener("input", () => {
     const term = searchInput.value.trim().toLowerCase();
@@ -162,6 +153,7 @@ function renderProductGrid(list) {
           data-product-id="${product.id}"
           ${outOfStock ? "disabled" : ""}
         >
+          ${product.image ? `<img class="product-tile__image" src="${product.image}" alt="" />` : ""}
           <span class="product-tile__name">${escapeHtml(product.name)}</span>
           <span class="product-tile__price">${formatMoney(product.price, settings.currencySymbol)}</span>
           ${
@@ -194,10 +186,6 @@ async function handleScan(barcode) {
     return;
   }
   addToCart(product);
-}
-
-function updateScannerSoundBtn() {
-  scannerSoundBtn.textContent = settings.scannerSoundEnabled ? "🔊 Sound: On" : "🔇 Sound: Off";
 }
 
 /* ---------- Camera barcode scanner ---------- */
