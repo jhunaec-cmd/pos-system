@@ -13,7 +13,7 @@
 */
 
 export const DB_NAME = "pos-db";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbPromise = null;
 
@@ -43,6 +43,11 @@ function openDb() {
 
       if (!database.objectStoreNames.contains("settings")) {
         database.createObjectStore("settings", { keyPath: "key" });
+      }
+
+      if (!database.objectStoreNames.contains("shifts")) {
+        const shifts = database.createObjectStore("shifts", { keyPath: "id" });
+        shifts.createIndex("startTime", "startTime", { unique: false });
       }
     };
 
@@ -141,6 +146,24 @@ export async function clearAllSales() {
   await withStore("sales", "readwrite", (store) => store.clear());
 }
 
+/* ---------- Shifts (cashier sessions) ---------- */
+
+/** The one shift with no endTime yet, or null if nobody's clocked in. */
+export async function getOpenShift() {
+  const shifts = await withStore("shifts", "readonly", (store) => requestToPromise(store.getAll()));
+  return shifts.find((shift) => shift.status === "open") || null;
+}
+
+export async function saveShift(shift) {
+  await withStore("shifts", "readwrite", (store) => store.put(shift));
+  return shift;
+}
+
+export async function getAllShifts() {
+  const shifts = await withStore("shifts", "readonly", (store) => requestToPromise(store.getAll()));
+  return shifts.sort((a, b) => b.startTime - a.startTime);
+}
+
 /* ---------- Settings ---------- */
 
 const DEFAULT_SETTINGS = {
@@ -188,25 +211,29 @@ export async function saveSettings(settings) {
 /** Gathers everything into one plain object, ready to be turned into a
  * downloadable JSON file. */
 export async function exportAllData() {
-  const [products, sales, settings] = await Promise.all([
+  const [products, sales, settings, shifts] = await Promise.all([
     getAllProducts(),
     getAllSales(),
     getSettings(),
+    getAllShifts(),
   ]);
-  return { products, sales, settings, exportedAt: new Date().toISOString() };
+  return { products, sales, settings, shifts, exportedAt: new Date().toISOString() };
 }
 
 /** Restores data from a previously exported object. Existing records with
  * the same id/key are overwritten; everything else is left untouched. */
 export async function importAllData(data) {
   const database = await openDb();
-  const tx = database.transaction(["products", "sales", "settings"], "readwrite");
+  const tx = database.transaction(["products", "sales", "settings", "shifts"], "readwrite");
 
   for (const product of data.products || []) {
     tx.objectStore("products").put(product);
   }
   for (const sale of data.sales || []) {
     tx.objectStore("sales").put(sale);
+  }
+  for (const shift of data.shifts || []) {
+    tx.objectStore("shifts").put(shift);
   }
   if (data.settings) {
     for (const [key, value] of Object.entries(data.settings)) {

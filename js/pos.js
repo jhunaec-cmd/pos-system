@@ -17,7 +17,7 @@ import { Cart } from "./cart.js";
 import { initScanner } from "./scanner.js";
 import { isCameraScanSupported, startCameraScanner } from "./camera-scanner.js";
 import { renderReceipt, printReceipt } from "./receipt.js";
-import { formatMoney, showToast, generateId, generateReceiptNumber, round2, playBeep, productTracksInventory, stockBadgeHtml } from "./utils.js";
+import { formatMoney, formatDateTime, showToast, generateId, generateReceiptNumber, round2, playBeep, productTracksInventory, stockBadgeHtml } from "./utils.js";
 import { requireAuth, lock, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
 import { applyThemeEarly } from "./theme.js";
@@ -60,6 +60,39 @@ const cameraModal = document.getElementById("camera-modal");
 const cameraVideo = document.getElementById("camera-video");
 const cancelCameraBtn = document.getElementById("cancel-camera-btn");
 let stopCamera = null; // set while the camera modal is open
+
+const shiftStatusText = document.getElementById("shift-status-text");
+const startShiftBtn = document.getElementById("start-shift-btn");
+const cashManagementBtn = document.getElementById("cash-management-btn");
+
+const startShiftModal = document.getElementById("start-shift-modal");
+const startShiftForm = document.getElementById("start-shift-form");
+const shiftCashierNameField = document.getElementById("shift-cashier-name");
+const shiftStartingCashField = document.getElementById("shift-starting-cash");
+const shiftStartTimePreview = document.getElementById("shift-start-time-preview");
+const cancelStartShiftBtn = document.getElementById("cancel-start-shift-btn");
+
+const cashManagementModal = document.getElementById("cash-management-modal");
+const cmCashierName = document.getElementById("cm-cashier-name");
+const cmStartTime = document.getElementById("cm-start-time");
+const cmStartingCash = document.getElementById("cm-starting-cash");
+const cmCashPayments = document.getElementById("cm-cash-payments");
+const cmCashRefunds = document.getElementById("cm-cash-refunds");
+const cmPaidOut = document.getElementById("cm-paid-out");
+const cmExpectedCash = document.getElementById("cm-expected-cash");
+const paidOutForm = document.getElementById("paid-out-form");
+const paidOutAmountField = document.getElementById("paid-out-amount");
+const paidOutReasonField = document.getElementById("paid-out-reason");
+const closeCashManagementBtn = document.getElementById("close-cash-management-btn");
+const showCloseShiftBtn = document.getElementById("show-close-shift-btn");
+const closeShiftSection = document.getElementById("close-shift-section");
+const csGross = document.getElementById("cs-gross");
+const csRefunds = document.getElementById("cs-refunds");
+const csDiscounts = document.getElementById("cs-discounts");
+const csNet = document.getElementById("cs-net");
+const confirmCloseShiftBtn = document.getElementById("confirm-close-shift-btn");
+
+let openShift = null;
 
 async function init() {
   settings = await db.getSettings();
@@ -140,6 +173,153 @@ async function init() {
     cameraScanBtn.title = "Camera scanning isn't supported in this browser - try Chrome, Edge, or Safari, or use search / a USB scanner instead.";
   }
   cancelCameraBtn.addEventListener("click", closeCameraModal);
+
+  openShift = await db.getOpenShift();
+  updateShiftBar();
+
+  startShiftBtn.addEventListener("click", openStartShiftModal);
+  cancelStartShiftBtn.addEventListener("click", () => (startShiftModal.hidden = true));
+  startShiftForm.addEventListener("submit", handleStartShift);
+
+  cashManagementBtn.addEventListener("click", openCashManagementModal);
+  closeCashManagementBtn.addEventListener("click", () => (cashManagementModal.hidden = true));
+  paidOutForm.addEventListener("submit", handleRecordPaidOut);
+  showCloseShiftBtn.addEventListener("click", showCloseShiftSummary);
+  confirmCloseShiftBtn.addEventListener("click", handleConfirmCloseShift);
+}
+
+/* ---------- Shift management ---------- */
+
+function updateShiftBar() {
+  if (openShift) {
+    shiftStatusText.textContent = `Shift: ${openShift.cashierName}`;
+    startShiftBtn.hidden = true;
+    cashManagementBtn.hidden = false;
+  } else {
+    shiftStatusText.textContent = "No shift open";
+    startShiftBtn.hidden = false;
+    cashManagementBtn.hidden = true;
+  }
+}
+
+function openStartShiftModal() {
+  startShiftForm.reset();
+  shiftStartingCashField.value = "0";
+  shiftStartTimePreview.textContent = formatDateTime(Date.now());
+  startShiftModal.hidden = false;
+  shiftCashierNameField.focus();
+}
+
+async function handleStartShift(event) {
+  event.preventDefault();
+
+  openShift = {
+    id: generateId(),
+    cashierName: shiftCashierNameField.value.trim(),
+    startTime: Date.now(),
+    startingCash: Number(shiftStartingCashField.value) || 0,
+    endTime: null,
+    paidOuts: [],
+    status: "open",
+    closingSummary: null,
+  };
+
+  await db.saveShift(openShift);
+  startShiftModal.hidden = true;
+  updateShiftBar();
+  showToast(`Shift started for ${openShift.cashierName}`);
+}
+
+/** Sums this shift's sales (all of them, or just Cash-paid ones). */
+async function getShiftSales(cashOnly) {
+  const allSales = await db.getAllSales();
+  return allSales.filter(
+    (sale) => sale.shiftId === openShift.id && (!cashOnly || sale.paymentMethod === "Cash")
+  );
+}
+
+async function openCashManagementModal() {
+  closeShiftSection.hidden = true;
+  cmCashierName.textContent = openShift.cashierName;
+  cmStartTime.textContent = formatDateTime(openShift.startTime);
+  await renderCashSummary();
+  cashManagementModal.hidden = false;
+}
+
+async function renderCashSummary() {
+  const currency = settings.currencySymbol;
+  const cashSales = await getShiftSales(true);
+  const cashPayments = round2(cashSales.reduce((sum, sale) => sum + sale.total, 0));
+  const cashRefunds = 0; // refunds aren't tracked yet - see Settings/History for CSV export in the meantime
+  const paidOut = round2(openShift.paidOuts.reduce((sum, entry) => sum + entry.amount, 0));
+  const expectedCash = round2(openShift.startingCash + cashPayments - cashRefunds - paidOut);
+
+  cmStartingCash.textContent = formatMoney(openShift.startingCash, currency);
+  cmCashPayments.textContent = formatMoney(cashPayments, currency);
+  cmCashRefunds.textContent = formatMoney(cashRefunds, currency);
+  cmPaidOut.textContent = formatMoney(paidOut, currency);
+  cmExpectedCash.textContent = formatMoney(expectedCash, currency);
+}
+
+async function handleRecordPaidOut(event) {
+  event.preventDefault();
+
+  const amount = Number(paidOutAmountField.value);
+  const reason = paidOutReasonField.value.trim();
+  if (!Number.isFinite(amount) || amount <= 0 || !reason) return;
+
+  openShift.paidOuts.push({ id: generateId(), amount, reason, timestamp: Date.now() });
+  await db.saveShift(openShift);
+
+  paidOutForm.reset();
+  await renderCashSummary();
+  showToast("Paid out recorded");
+}
+
+async function showCloseShiftSummary() {
+  const currency = settings.currencySymbol;
+  const allShiftSales = await getShiftSales(false);
+  const grossSales = round2(allShiftSales.reduce((sum, sale) => sum + sale.total, 0));
+  const refunds = 0; // placeholder until refunds are implemented
+  const discounts = 0; // placeholder until discounts are implemented
+  const netSales = round2(grossSales - refunds - discounts);
+
+  csGross.textContent = formatMoney(grossSales, currency);
+  csRefunds.textContent = formatMoney(refunds, currency);
+  csDiscounts.textContent = formatMoney(discounts, currency);
+  csNet.textContent = formatMoney(netSales, currency);
+
+  closeShiftSection.hidden = false;
+}
+
+async function handleConfirmCloseShift() {
+  const confirmed = confirm(`Close the shift for ${openShift.cashierName}? This cannot be undone.`);
+  if (!confirmed) return;
+
+  const cashSales = await getShiftSales(true);
+  const allShiftSales = await getShiftSales(false);
+  const cashPayments = round2(cashSales.reduce((sum, sale) => sum + sale.total, 0));
+  const grossSales = round2(allShiftSales.reduce((sum, sale) => sum + sale.total, 0));
+  const paidOut = round2(openShift.paidOuts.reduce((sum, entry) => sum + entry.amount, 0));
+
+  openShift.endTime = Date.now();
+  openShift.status = "closed";
+  openShift.closingSummary = {
+    grossSales,
+    refunds: 0,
+    discounts: 0,
+    netSales: grossSales,
+    cashPayments,
+    cashRefunds: 0,
+    paidOut,
+    expectedCash: round2(openShift.startingCash + cashPayments - paidOut),
+  };
+
+  await db.saveShift(openShift);
+  showToast(`Shift closed for ${openShift.cashierName}`);
+  openShift = null;
+  cashManagementModal.hidden = true;
+  updateShiftBar();
 }
 
 /* ---------- Product grid ---------- */
@@ -334,6 +514,7 @@ async function confirmPayment() {
     paymentMethod: selectedPaymentMethod,
     cashTendered,
     change,
+    shiftId: openShift ? openShift.id : null,
   };
 
   await db.saveSale(sale);

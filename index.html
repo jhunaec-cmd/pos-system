@@ -68,6 +68,14 @@
     <button type="button" class="app-nav__link" id="nav-lock-btn" data-i18n="nav.lock">🔒 Lock</button>
   </nav>
 
+  <!-- Shift status bar - Start Shift when no one's clocked in, or the
+       cashier's name + Cash Management once one is. -->
+  <div class="shift-bar">
+    <span id="shift-status-text" class="shift-bar__status">No shift open</span>
+    <button type="button" class="btn btn--primary" id="start-shift-btn">Start Shift</button>
+    <button type="button" class="btn" id="cash-management-btn" hidden>Cash Management</button>
+  </div>
+
   <main class="page">
     <div class="pos-layout">
       <!-- Product search + grid -->
@@ -176,6 +184,82 @@
       <div class="modal__actions">
         <button type="button" class="btn" id="print-receipt-btn">Print</button>
         <button type="button" class="btn btn--primary" id="new-sale-btn">New Sale</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start Shift modal -->
+  <div class="modal-overlay" id="start-shift-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="start-shift-title">
+      <h2 id="start-shift-title">Start Shift</h2>
+      <form id="start-shift-form">
+        <div class="field">
+          <label for="shift-cashier-name">Cashier name</label>
+          <input type="text" id="shift-cashier-name" required />
+        </div>
+        <div class="field">
+          <label for="shift-starting-cash">Starting cash</label>
+          <input type="number" id="shift-starting-cash" min="0" step="0.01" value="0" required />
+        </div>
+        <p class="text-muted">Start time: <strong id="shift-start-time-preview"></strong></p>
+        <div class="modal__actions">
+          <button type="button" class="btn" id="cancel-start-shift-btn">Cancel</button>
+          <button type="submit" class="btn btn--primary">Start Shift</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Cash Management modal - also where a shift gets closed out. -->
+  <div class="modal-overlay" id="cash-management-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cash-management-title">
+      <h2 id="cash-management-title">Cash Management</h2>
+      <p class="text-muted">
+        Cashier: <strong id="cm-cashier-name"></strong> &middot; Started: <span id="cm-start-time"></span>
+      </p>
+
+      <div class="cash-summary">
+        <div class="cash-summary-row"><span>Starting Cash</span><span id="cm-starting-cash"></span></div>
+        <div class="cash-summary-row"><span>Cash Payments</span><span id="cm-cash-payments"></span></div>
+        <div class="cash-summary-row"><span>Cash Refunds</span><span id="cm-cash-refunds"></span></div>
+        <div class="cash-summary-row"><span>Paid Out</span><span id="cm-paid-out"></span></div>
+        <div class="cash-summary-row cash-summary-row--grand"><span>Expected Cash in Drawer</span><span id="cm-expected-cash"></span></div>
+      </div>
+
+      <h3 style="margin-top: var(--space-lg);">Record Paid Out</h3>
+      <p class="text-muted" style="font-size: var(--font-size-sm); margin-top:0;">
+        Cash taken out of the drawer for expenses (e.g. buying supplies).
+      </p>
+      <form id="paid-out-form">
+        <div class="field">
+          <label for="paid-out-amount">Amount</label>
+          <input type="number" id="paid-out-amount" min="0.01" step="0.01" required />
+        </div>
+        <div class="field">
+          <label for="paid-out-reason">Reason</label>
+          <input type="text" id="paid-out-reason" required />
+        </div>
+        <button type="submit" class="btn">Record Paid Out</button>
+      </form>
+
+      <div id="close-shift-section" hidden>
+        <hr class="receipt__divider" style="border-color: var(--color-border);" />
+        <h3>Sales Summary</h3>
+        <div class="cash-summary">
+          <div class="cash-summary-row"><span>Gross Sales</span><span id="cs-gross"></span></div>
+          <div class="cash-summary-row"><span>Refunds</span><span id="cs-refunds"></span></div>
+          <div class="cash-summary-row"><span>Discounts</span><span id="cs-discounts"></span></div>
+          <div class="cash-summary-row cash-summary-row--grand"><span>Net Sales</span><span id="cs-net"></span></div>
+        </div>
+        <p class="text-muted" style="font-size: var(--font-size-sm);">
+          Closing a shift is final - it cannot be reopened.
+        </p>
+        <button type="button" class="btn btn--danger" id="confirm-close-shift-btn" style="width:100%;">Confirm Close Shift</button>
+      </div>
+
+      <div class="modal__actions">
+        <button type="button" class="btn" id="close-cash-management-btn">Close</button>
+        <button type="button" class="btn btn--danger" id="show-close-shift-btn">Close Shift</button>
       </div>
     </div>
   </div>

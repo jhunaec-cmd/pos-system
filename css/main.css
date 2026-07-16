@@ -142,6 +142,46 @@ button.app-nav__link {
   line-height: 1;
 }
 
+/* --- Shift status bar (Checkout page) --- */
+.shift-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-sm) var(--space-md);
+  flex-wrap: wrap;
+}
+
+.shift-bar__status {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-right: auto;
+}
+
+/* --- Cash Management / Sales Summary rows --- */
+.cash-summary {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.cash-summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+  font-size: var(--font-size-sm);
+}
+
+.cash-summary-row--grand {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-xs);
+  padding-top: var(--space-sm);
+}
+
 /* --- Toggle / slide switch (e.g. "Track inventory") --- */
 .switch-row {
   display: flex;
