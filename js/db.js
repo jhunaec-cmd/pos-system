@@ -151,6 +151,7 @@ const DEFAULT_SETTINGS = {
   pinHash: null,
   masterPinHash: null,
   resetHistoryPinHash: null,
+  editProductPinHash: null,
   autoLockMinutes: 0, // 0 = auto-lock disabled
   scannerSoundEnabled: true,
   scannerSensitivity: "medium", // "low" | "medium" | "high" - see js/scanner.js

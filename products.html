@@ -158,6 +158,31 @@
     </div>
   </div>
 
+  <!-- Edit/Delete Product password modal - protected by its own separate
+       password (not the staff PIN), since staff shouldn't be able to
+       change or remove existing catalog entries on their own. -->
+  <div class="modal-overlay" id="edit-product-pw-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-product-pw-title">
+      <h2 id="edit-product-pw-title">Password Required</h2>
+      <p id="edit-product-pw-message">Checking...</p>
+      <form id="edit-product-pw-form">
+        <div class="field">
+          <label for="edit-product-pw">Password</label>
+          <input type="password" id="edit-product-pw" autocomplete="off" required />
+        </div>
+        <div class="field" id="edit-product-pw-confirm-field" hidden>
+          <label for="edit-product-pw-confirm">Confirm password</label>
+          <input type="password" id="edit-product-pw-confirm" autocomplete="off" />
+        </div>
+        <p class="field-error" id="edit-product-pw-error" hidden></p>
+        <div class="modal__actions">
+          <button type="button" class="btn" id="cancel-edit-product-pw-btn">Cancel</button>
+          <button type="submit" class="btn btn--primary">Confirm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="toast" class="toast" role="status" hidden></div>
 
   <script type="module" src="js/sw-register.js"></script>

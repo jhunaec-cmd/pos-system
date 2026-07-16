@@ -6,7 +6,7 @@
 */
 
 import * as db from "./db.js";
-import { formatMoney, generateId, showToast, playBeep } from "./utils.js";
+import { formatMoney, generateId, showToast, playBeep, sha256 } from "./utils.js";
 import { requireAuth, lock, startIdleTimer } from "./auth.js";
 import { requireDeviceAuth } from "./device-auth.js";
 import { isCameraScanSupported, startCameraScanner } from "./camera-scanner.js";
@@ -39,6 +39,16 @@ const cancelCameraBtn = document.getElementById("cancel-camera-btn");
 let stopCamera = null; // set while the camera modal is open
 let cameraModalOpen = false;
 
+const editPwModal = document.getElementById("edit-product-pw-modal");
+const editPwMessage = document.getElementById("edit-product-pw-message");
+const editPwForm = document.getElementById("edit-product-pw-form");
+const editPwInput = document.getElementById("edit-product-pw");
+const editPwConfirmField = document.getElementById("edit-product-pw-confirm-field");
+const editPwConfirmInput = document.getElementById("edit-product-pw-confirm");
+const editPwError = document.getElementById("edit-product-pw-error");
+const cancelEditPwBtn = document.getElementById("cancel-edit-product-pw-btn");
+let pendingEditAction = null; // function to run once the password is confirmed
+
 async function init() {
   settings = await db.getSettings();
   products = await db.getAllProducts();
@@ -65,9 +75,9 @@ async function init() {
     if (!product) return;
 
     if (event.target.matches("[data-action='edit']")) {
-      openModal(product);
+      requireEditPassword(() => openModal(product));
     } else if (event.target.matches("[data-action='delete']")) {
-      handleDelete(product);
+      requireEditPassword(() => handleDelete(product));
     }
   });
 
@@ -78,6 +88,73 @@ async function init() {
     scanBarcodeBtn.title = "Camera scanning isn't supported in this browser - try Chrome, Edge, or Safari, or type the barcode instead.";
   }
   cancelCameraBtn.addEventListener("click", closeCameraModal);
+
+  cancelEditPwBtn.addEventListener("click", closeEditPasswordModal);
+  editPwForm.addEventListener("submit", handleEditPasswordSubmit);
+}
+
+/* ---------- Edit/Delete password gate ---------- */
+
+/** Shows the password modal before letting an edit/delete action through -
+ * `action` is a function that runs only once the password is confirmed. */
+function requireEditPassword(action) {
+  pendingEditAction = action;
+
+  const firstRun = !settings.editProductPinHash;
+  editPwMessage.textContent = firstRun
+    ? "Set up a password to protect editing/deleting products. Only share it with people you trust to manage inventory."
+    : "Enter the password to edit or delete this product.";
+  editPwConfirmField.hidden = !firstRun;
+  editPwConfirmInput.required = firstRun;
+  editPwError.hidden = true;
+  editPwInput.value = "";
+  editPwConfirmInput.value = "";
+
+  editPwModal.hidden = false;
+  editPwInput.focus();
+}
+
+function closeEditPasswordModal() {
+  editPwModal.hidden = true;
+  pendingEditAction = null;
+}
+
+async function handleEditPasswordSubmit(event) {
+  event.preventDefault();
+  editPwError.hidden = true;
+
+  const firstRun = !settings.editProductPinHash;
+
+  if (firstRun) {
+    if (editPwInput.value.length < 4) {
+      showEditPwError("Password must be at least 4 characters.");
+      return;
+    }
+    if (editPwInput.value !== editPwConfirmInput.value) {
+      showEditPwError("Passwords don't match.");
+      return;
+    }
+    settings.editProductPinHash = await sha256(editPwInput.value);
+    await db.saveSettings({ editProductPinHash: settings.editProductPinHash });
+  } else {
+    const enteredHash = await sha256(editPwInput.value);
+    if (enteredHash !== settings.editProductPinHash) {
+      showEditPwError("Incorrect password.");
+      editPwInput.value = "";
+      editPwInput.focus();
+      return;
+    }
+  }
+
+  const action = pendingEditAction;
+  editPwModal.hidden = true;
+  pendingEditAction = null;
+  if (action) action();
+}
+
+function showEditPwError(text) {
+  editPwError.textContent = text;
+  editPwError.hidden = false;
 }
 
 /* ---------- Camera barcode scanner ---------- */
