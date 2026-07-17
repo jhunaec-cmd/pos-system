@@ -11,7 +11,7 @@
   file, so returning users get the new version instead of a stale cache.
 */
 
-const CACHE_NAME = "pos-cache-v21";
+const CACHE_NAME = "pos-cache-v22";
 
 const APP_SHELL_FILES = [
   "./",

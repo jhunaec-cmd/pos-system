@@ -31,7 +31,6 @@ const cart = new Cart();
 let products = [];
 let settings = null;
 let selectedPaymentMethod = "Cash";
-let taxEnabled = true; // per-sale toggle - resets to on for each new sale
 
 const productGridEl = document.getElementById("product-grid");
 const searchInput = document.getElementById("product-search");
@@ -41,7 +40,6 @@ const subtotalEl = document.getElementById("cart-subtotal");
 const discountRowEl = document.getElementById("cart-discount-row");
 const discountEl = document.getElementById("cart-discount");
 const taxEl = document.getElementById("cart-tax");
-const toggleTaxBtn = document.getElementById("toggle-tax-btn");
 const totalEl = document.getElementById("cart-total");
 const chargeBtn = document.getElementById("charge-btn");
 const clearCartBtn = document.getElementById("clear-cart-btn");
@@ -159,12 +157,6 @@ async function init() {
 
   clearCartBtn.addEventListener("click", () => {
     cart.clear();
-    renderCart();
-  });
-
-  toggleTaxBtn.addEventListener("click", () => {
-    taxEnabled = !taxEnabled;
-    toggleTaxBtn.textContent = taxEnabled ? "Tax: On" : "Tax: Off";
     renderCart();
   });
 
@@ -449,10 +441,10 @@ function closeCameraModal() {
   }
 }
 
-/** The tax rate actually used for calculations right now - the store's
- * configured rate, or 0 while this sale's "Tax: Off" toggle is on. */
+/** The tax rate actually used for calculations - the store's configured
+ * rate, or 0 when tax is turned off in Settings > Store Details. */
 function getEffectiveTaxRate() {
-  return taxEnabled ? settings.taxRate : 0;
+  return settings.taxEnabled === false ? 0 : settings.taxRate;
 }
 
 /* ---------- Cart rendering ---------- */
@@ -615,8 +607,6 @@ async function confirmPayment() {
 function startNewSale() {
   receiptModal.hidden = true;
   cart.clear();
-  taxEnabled = true;
-  toggleTaxBtn.textContent = "Tax: On";
   renderCart();
   renderProductGrid(products);
   searchInput.value = "";

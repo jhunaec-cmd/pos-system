@@ -170,6 +170,7 @@ const DEFAULT_SETTINGS = {
   storeName: "My Store",
   storeAddress: "",
   taxRate: 0,
+  taxEnabled: true,
   currencySymbol: "$",
   pinHash: null,
   masterPinHash: null,

@@ -21,6 +21,7 @@ const form = document.getElementById("settings-form");
 const storeNameField = document.getElementById("store-name");
 const storeAddressField = document.getElementById("store-address");
 const taxRateField = document.getElementById("tax-rate");
+const taxEnabledField = document.getElementById("tax-enabled");
 const currencySymbolField = document.getElementById("currency-symbol");
 
 const exportBtn = document.getElementById("export-btn");
@@ -47,6 +48,7 @@ async function init() {
   storeNameField.value = settings.storeName;
   storeAddressField.value = settings.storeAddress;
   taxRateField.value = settings.taxRate;
+  taxEnabledField.checked = settings.taxEnabled !== false;
   currencySymbolField.value = settings.currencySymbol;
   autoLockField.value = String(settings.autoLockMinutes || 0);
   scannerSoundField.value = settings.scannerSoundEnabled ? "on" : "off";
@@ -112,6 +114,7 @@ async function handleSave(event) {
     storeName: storeNameField.value.trim() || "My Store",
     storeAddress: storeAddressField.value.trim(),
     taxRate: Number(taxRateField.value) || 0,
+    taxEnabled: taxEnabledField.checked,
     currencySymbol: currencySymbolField.value.trim() || "$",
   });
 
