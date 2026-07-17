@@ -115,9 +115,17 @@
             <p class="empty-state" id="cart-empty" data-i18n="checkout.cartEmpty">Cart is empty. Scan or tap a product to begin.</p>
           </div>
 
+          <div class="cart__discount-actions">
+            <button type="button" class="btn btn--icon" id="apply-discount-all-btn">Apply Discount to All</button>
+            <button type="button" class="btn btn--icon" id="apply-discount-specific-btn">Apply Discount to Specific Product</button>
+          </div>
+
           <div class="cart__totals">
             <div class="cart__totals-row">
               <span data-i18n="checkout.subtotal">Subtotal</span><span id="cart-subtotal">RM 0.00</span>
+            </div>
+            <div class="cart__totals-row" id="cart-discount-row">
+              <span>Discount</span><span id="cart-discount">-RM 0.00</span>
             </div>
             <div class="cart__totals-row">
               <span data-i18n="checkout.tax">Tax</span><span id="cart-tax">RM 0.00</span>
@@ -172,6 +180,21 @@
       <p class="text-muted">Point the camera at a barcode. It'll be added to the cart automatically.</p>
       <div class="modal__actions">
         <button type="button" class="btn" id="cancel-camera-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- "Apply Discount to Specific Product" picker - lists cart lines that
+       have a discount configured on the product, one Apply button each. -->
+  <div class="modal-overlay" id="discount-picker-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="discount-picker-title">
+      <h2 id="discount-picker-title">Apply Discount to Specific Product</h2>
+      <div id="discount-picker-list"></div>
+      <p class="empty-state" id="discount-picker-empty" hidden>
+        No items in the cart have a discount configured. Set one on the product in Products first.
+      </p>
+      <div class="modal__actions">
+        <button type="button" class="btn" id="close-discount-picker-btn">Close</button>
       </div>
     </div>
   </div>

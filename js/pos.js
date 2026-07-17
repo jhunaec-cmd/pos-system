@@ -37,10 +37,19 @@ const searchInput = document.getElementById("product-search");
 const cartLinesEl = document.getElementById("cart-lines");
 const cartEmptyEl = document.getElementById("cart-empty");
 const subtotalEl = document.getElementById("cart-subtotal");
+const discountRowEl = document.getElementById("cart-discount-row");
+const discountEl = document.getElementById("cart-discount");
 const taxEl = document.getElementById("cart-tax");
 const totalEl = document.getElementById("cart-total");
 const chargeBtn = document.getElementById("charge-btn");
 const clearCartBtn = document.getElementById("clear-cart-btn");
+
+const applyDiscountAllBtn = document.getElementById("apply-discount-all-btn");
+const applyDiscountSpecificBtn = document.getElementById("apply-discount-specific-btn");
+const discountPickerModal = document.getElementById("discount-picker-modal");
+const discountPickerList = document.getElementById("discount-picker-list");
+const discountPickerEmpty = document.getElementById("discount-picker-empty");
+const closeDiscountPickerBtn = document.getElementById("close-discount-picker-btn");
 
 const paymentModal = document.getElementById("payment-modal");
 const paymentTotalEl = document.getElementById("payment-total");
@@ -149,6 +158,24 @@ async function init() {
   clearCartBtn.addEventListener("click", () => {
     cart.clear();
     renderCart();
+  });
+
+  applyDiscountAllBtn.addEventListener("click", () => {
+    cart.applyDiscountToAll();
+    renderCart();
+  });
+  applyDiscountSpecificBtn.addEventListener("click", openDiscountPicker);
+  closeDiscountPickerBtn.addEventListener("click", () => (discountPickerModal.hidden = true));
+  discountPickerList.addEventListener("click", (event) => {
+    const row = event.target.closest("[data-product-id]");
+    if (!row) return;
+    if (event.target.matches("[data-action='apply-discount']")) {
+      cart.applyDiscountToLine(row.dataset.productId);
+    } else if (event.target.matches("[data-action='remove-discount']")) {
+      cart.removeDiscountFromLine(row.dataset.productId);
+    }
+    renderCart();
+    renderDiscountPickerList();
   });
 
   chargeBtn.addEventListener("click", openPaymentModal);
@@ -276,13 +303,20 @@ async function handleRecordPaidOut(event) {
   showToast("Paid out recorded");
 }
 
+/** Gross/discounts/net are pre-tax (tax collected is a pass-through, not
+ * revenue) - refunds stay a placeholder until that feature exists. */
+async function computeSalesSummary() {
+  const allShiftSales = await getShiftSales(false);
+  const grossSales = round2(allShiftSales.reduce((sum, sale) => sum + sale.subtotal, 0));
+  const discounts = round2(allShiftSales.reduce((sum, sale) => sum + (sale.discount || 0), 0));
+  const refunds = 0; // placeholder until refunds are implemented
+  const netSales = round2(grossSales - discounts - refunds);
+  return { grossSales, discounts, refunds, netSales };
+}
+
 async function showCloseShiftSummary() {
   const currency = settings.currencySymbol;
-  const allShiftSales = await getShiftSales(false);
-  const grossSales = round2(allShiftSales.reduce((sum, sale) => sum + sale.total, 0));
-  const refunds = 0; // placeholder until refunds are implemented
-  const discounts = 0; // placeholder until discounts are implemented
-  const netSales = round2(grossSales - refunds - discounts);
+  const { grossSales, discounts, refunds, netSales } = await computeSalesSummary();
 
   csGross.textContent = formatMoney(grossSales, currency);
   csRefunds.textContent = formatMoney(refunds, currency);
@@ -297,18 +331,17 @@ async function handleConfirmCloseShift() {
   if (!confirmed) return;
 
   const cashSales = await getShiftSales(true);
-  const allShiftSales = await getShiftSales(false);
   const cashPayments = round2(cashSales.reduce((sum, sale) => sum + sale.total, 0));
-  const grossSales = round2(allShiftSales.reduce((sum, sale) => sum + sale.total, 0));
   const paidOut = round2(openShift.paidOuts.reduce((sum, entry) => sum + entry.amount, 0));
+  const { grossSales, discounts, refunds, netSales } = await computeSalesSummary();
 
   openShift.endTime = Date.now();
   openShift.status = "closed";
   openShift.closingSummary = {
     grossSales,
-    refunds: 0,
-    discounts: 0,
-    netSales: grossSales,
+    refunds,
+    discounts,
+    netSales,
     cashPayments,
     cashRefunds: 0,
     paidOut,
@@ -420,12 +453,16 @@ function renderCart() {
   } else {
     cartEmptyEl.hidden = true;
     cartLinesEl.innerHTML = cart.lines
-      .map(
-        (line) => `
+      .map((line) => {
+        const lineDiscount = cart.lineDiscountAmount(line);
+        const lineTotal = round2(line.price * line.qty - lineDiscount);
+        return `
         <div class="cart-line" data-line-id="${line.productId}">
           <div class="cart-line__info">
             <div class="cart-line__name">${escapeHtml(line.name)}</div>
-            <div class="cart-line__price">${formatMoney(line.price, currency)} each</div>
+            <div class="cart-line__price">${formatMoney(line.price, currency)} each${
+          lineDiscount > 0 ? ` &middot; <span class="text-muted">-${formatMoney(lineDiscount, currency)} discount</span>` : ""
+        }</div>
           </div>
           <div class="cart-line__qty">
             <button type="button" class="btn btn--icon" data-action="decrease" aria-label="Decrease quantity">-</button>
@@ -438,18 +475,51 @@ function renderCart() {
             />
             <button type="button" class="btn btn--icon" data-action="increase" aria-label="Increase quantity">+</button>
           </div>
-          <div class="cart-line__total">${formatMoney(round2(line.price * line.qty), currency)}</div>
+          <div class="cart-line__total">${formatMoney(lineTotal, currency)}</div>
           <button type="button" class="btn btn--icon" data-action="remove" aria-label="Remove ${escapeHtml(line.name)}">&times;</button>
-        </div>`
-      )
+        </div>`;
+      })
       .join("");
   }
 
   const totals = cart.getTotals(settings.taxRate);
   subtotalEl.textContent = formatMoney(totals.subtotal, currency);
+  discountRowEl.hidden = totals.discount <= 0;
+  discountEl.textContent = `-${formatMoney(totals.discount, currency)}`;
   taxEl.textContent = formatMoney(totals.taxAmount, currency);
   totalEl.textContent = formatMoney(totals.total, currency);
   chargeBtn.disabled = cart.isEmpty;
+}
+
+/* ---------- Discount picker ---------- */
+
+function openDiscountPicker() {
+  renderDiscountPickerList();
+  discountPickerModal.hidden = false;
+}
+
+function renderDiscountPickerList() {
+  const eligible = cart.lines.filter((line) => line.discountType !== "none");
+  discountPickerEmpty.hidden = eligible.length > 0;
+
+  discountPickerList.innerHTML = eligible
+    .map((line) => {
+      const description =
+        line.discountType === "percent" ? `${line.discountValue}% off` : `${formatMoney(line.discountValue, settings.currencySymbol)} off`;
+      return `
+        <div class="discount-picker-row" data-product-id="${line.productId}">
+          <div>
+            <div>${escapeHtml(line.name)}</div>
+            <div class="text-muted" style="font-size: var(--font-size-sm);">${description}</div>
+          </div>
+          ${
+            line.discountApplied
+              ? `<div><span class="discount-picker-row__applied">Applied ✓</span> <button type="button" class="btn btn--icon" data-action="remove-discount">Remove</button></div>`
+              : `<button type="button" class="btn btn--icon" data-action="apply-discount">Apply</button>`
+          }
+        </div>`;
+    })
+    .join("");
 }
 
 /* ---------- Payment modal ---------- */
@@ -505,9 +575,11 @@ async function confirmPayment() {
       name: line.name,
       price: line.price,
       qty: line.qty,
-      lineTotal: round2(line.price * line.qty),
+      discount: cart.lineDiscountAmount(line),
+      lineTotal: round2(line.price * line.qty - cart.lineDiscountAmount(line)),
     })),
     subtotal: totals.subtotal,
+    discount: totals.discount,
     taxRate: settings.taxRate,
     taxAmount: totals.taxAmount,
     total: totals.total,

@@ -36,6 +36,10 @@ const soldByField = document.getElementById("product-sold-by");
 const priceLabel = document.getElementById("product-price-label");
 const priceField = document.getElementById("product-price");
 const categoryField = document.getElementById("product-category");
+const discountTypeField = document.getElementById("product-discount-type");
+const discountValueField = document.getElementById("product-discount-value");
+const discountValueFieldWrap = document.getElementById("discount-value-field");
+const discountValueLabel = document.getElementById("product-discount-value-label");
 const trackInventoryField = document.getElementById("product-track-inventory");
 const inventoryFields = document.getElementById("inventory-fields");
 const stockField = document.getElementById("product-stock");
@@ -117,10 +121,17 @@ async function init() {
     inventoryFields.hidden = !trackInventoryField.checked;
   });
   soldByField.addEventListener("change", updatePriceLabel);
+  discountTypeField.addEventListener("change", updateDiscountValueField);
 }
 
 function updatePriceLabel() {
   priceLabel.textContent = soldByField.value === "weight" ? "Price (per kg)" : "Price (per item)";
+}
+
+function updateDiscountValueField() {
+  const type = discountTypeField.value;
+  discountValueFieldWrap.hidden = type === "none";
+  discountValueLabel.textContent = type === "percent" ? "Discount (%)" : "Discount amount";
 }
 
 /* ---------- Product photo ---------- */
@@ -267,6 +278,7 @@ function renderTable(list) {
         <td>${escapeHtml(product.sku || "")}</td>
         <td class="text-right">${formatMoney(product.price, settings.currencySymbol)}${product.soldBy === "weight" ? "/kg" : ""}</td>
         <td>${escapeHtml(product.category || "")}</td>
+        <td>${discountLabel(product)}</td>
         <td>${stockBadgeHtml(product) || `<span class="text-muted">Not tracked</span>`}</td>
         <td class="text-right">
           <button type="button" class="btn btn--icon" data-action="edit">Edit</button>
@@ -291,6 +303,8 @@ function openModal(product = null) {
     soldByField.value = product.soldBy === "weight" ? "weight" : "each";
     priceField.value = product.price;
     categoryField.value = product.category || "";
+    discountTypeField.value = product.discountType || "none";
+    discountValueField.value = typeof product.discountValue === "number" ? product.discountValue : "";
 
     const tracks = productTracksInventory(product);
     trackInventoryField.checked = tracks;
@@ -306,11 +320,13 @@ function openModal(product = null) {
     modalTitle.textContent = "Add Product";
     idField.value = "";
     soldByField.value = "each";
+    discountTypeField.value = "none";
     trackInventoryField.checked = false;
     inventoryFields.hidden = true;
   }
 
   updatePriceLabel();
+  updateDiscountValueField();
   modal.hidden = false;
   nameField.focus();
 }
@@ -357,6 +373,7 @@ async function handleSubmit(event) {
   if (hasError) return;
 
   const trackInventory = trackInventoryField.checked;
+  const discountType = discountTypeField.value;
 
   const product = {
     id: currentId || generateId(),
@@ -366,6 +383,8 @@ async function handleSubmit(event) {
     soldBy: soldByField.value === "weight" ? "weight" : "each",
     price,
     category: categoryField.value.trim(),
+    discountType,
+    discountValue: discountType === "none" ? 0 : Number(discountValueField.value) || 0,
     trackInventory,
     stock: trackInventory && stockRaw !== "" ? Number(stockRaw) : trackInventory ? 0 : null,
     lowStock: trackInventory && lowStockRaw !== "" ? Number(lowStockRaw) : null,
@@ -395,6 +414,16 @@ function showError(id) {
 
 function clearErrors() {
   document.querySelectorAll(".field-error").forEach((el) => (el.hidden = true));
+}
+
+function discountLabel(product) {
+  if (!product.discountType || product.discountType === "none") {
+    return `<span class="text-muted">-</span>`;
+  }
+  if (product.discountType === "percent") {
+    return `${product.discountValue}% off`;
+  }
+  return `${formatMoney(product.discountValue, settings.currencySymbol)} off`;
 }
 
 function escapeHtml(value) {

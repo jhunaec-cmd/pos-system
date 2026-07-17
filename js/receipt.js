@@ -42,6 +42,13 @@ export function renderReceipt(container, sale, settings) {
       <div class="receipt__totals-row">
         <span>Subtotal</span><span>${money(sale.subtotal)}</span>
       </div>
+      ${
+        sale.discount > 0
+          ? `<div class="receipt__totals-row">
+               <span>Discount</span><span>-${money(sale.discount)}</span>
+             </div>`
+          : ""
+      }
       <div class="receipt__totals-row">
         <span>Tax (${sale.taxRate}%)</span><span>${money(sale.taxAmount)}</span>
       </div>

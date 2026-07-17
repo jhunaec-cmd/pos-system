@@ -188,6 +188,34 @@
   flex: 1;
 }
 
+.cart__discount-actions {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  margin: var(--space-sm) 0;
+}
+
+.cart__discount-actions .btn {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  white-space: normal;
+}
+
+.discount-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.discount-picker-row__applied {
+  color: var(--color-success);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
 /* --- Barcode scanner status pill --- */
 .scanner-status {
   display: flex;
