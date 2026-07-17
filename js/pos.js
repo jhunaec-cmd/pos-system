@@ -31,6 +31,7 @@ const cart = new Cart();
 let products = [];
 let settings = null;
 let selectedPaymentMethod = "Cash";
+let taxEnabled = true; // per-sale toggle - resets to on for each new sale
 
 const productGridEl = document.getElementById("product-grid");
 const searchInput = document.getElementById("product-search");
@@ -40,6 +41,7 @@ const subtotalEl = document.getElementById("cart-subtotal");
 const discountRowEl = document.getElementById("cart-discount-row");
 const discountEl = document.getElementById("cart-discount");
 const taxEl = document.getElementById("cart-tax");
+const toggleTaxBtn = document.getElementById("toggle-tax-btn");
 const totalEl = document.getElementById("cart-total");
 const chargeBtn = document.getElementById("charge-btn");
 const clearCartBtn = document.getElementById("clear-cart-btn");
@@ -157,6 +159,12 @@ async function init() {
 
   clearCartBtn.addEventListener("click", () => {
     cart.clear();
+    renderCart();
+  });
+
+  toggleTaxBtn.addEventListener("click", () => {
+    taxEnabled = !taxEnabled;
+    toggleTaxBtn.textContent = taxEnabled ? "Tax: On" : "Tax: Off";
     renderCart();
   });
 
@@ -441,6 +449,12 @@ function closeCameraModal() {
   }
 }
 
+/** The tax rate actually used for calculations right now - the store's
+ * configured rate, or 0 while this sale's "Tax: Off" toggle is on. */
+function getEffectiveTaxRate() {
+  return taxEnabled ? settings.taxRate : 0;
+}
+
 /* ---------- Cart rendering ---------- */
 
 function renderCart() {
@@ -482,7 +496,7 @@ function renderCart() {
       .join("");
   }
 
-  const totals = cart.getTotals(settings.taxRate);
+  const totals = cart.getTotals(getEffectiveTaxRate());
   subtotalEl.textContent = formatMoney(totals.subtotal, currency);
   discountRowEl.hidden = totals.discount <= 0;
   discountEl.textContent = `-${formatMoney(totals.discount, currency)}`;
@@ -525,7 +539,7 @@ function renderDiscountPickerList() {
 /* ---------- Payment modal ---------- */
 
 function openPaymentModal() {
-  const totals = cart.getTotals(settings.taxRate);
+  const totals = cart.getTotals(getEffectiveTaxRate());
   paymentTotalEl.textContent = formatMoney(totals.total, settings.currencySymbol);
   cashTenderedInput.value = "";
   selectPaymentMethod("Cash");
@@ -546,14 +560,14 @@ function selectPaymentMethod(method) {
 }
 
 function updateChangeDue() {
-  const totals = cart.getTotals(settings.taxRate);
+  const totals = cart.getTotals(getEffectiveTaxRate());
   const tendered = Number(cashTenderedInput.value) || 0;
   const change = round2(tendered - totals.total);
   changeDueEl.textContent = formatMoney(Math.max(0, change), settings.currencySymbol);
 }
 
 async function confirmPayment() {
-  const totals = cart.getTotals(settings.taxRate);
+  const totals = cart.getTotals(getEffectiveTaxRate());
   let cashTendered = null;
   let change = null;
 
@@ -580,7 +594,7 @@ async function confirmPayment() {
     })),
     subtotal: totals.subtotal,
     discount: totals.discount,
-    taxRate: settings.taxRate,
+    taxRate: getEffectiveTaxRate(),
     taxAmount: totals.taxAmount,
     total: totals.total,
     paymentMethod: selectedPaymentMethod,
@@ -601,6 +615,8 @@ async function confirmPayment() {
 function startNewSale() {
   receiptModal.hidden = true;
   cart.clear();
+  taxEnabled = true;
+  toggleTaxBtn.textContent = "Tax: On";
   renderCart();
   renderProductGrid(products);
   searchInput.value = "";
