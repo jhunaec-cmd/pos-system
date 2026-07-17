@@ -49,9 +49,13 @@ export function renderReceipt(container, sale, settings) {
              </div>`
           : ""
       }
-      <div class="receipt__totals-row">
-        <span>Tax (${sale.taxRate}%)</span><span>${money(sale.taxAmount)}</span>
-      </div>
+      ${
+        sale.taxEnabled === false
+          ? ""
+          : `<div class="receipt__totals-row">
+               <span>Tax (${sale.taxRate}%)</span><span>${money(sale.taxAmount)}</span>
+             </div>`
+      }
       <div class="receipt__totals-row receipt__totals-row--grand">
         <span>Total</span><span>${money(sale.total)}</span>
       </div>

@@ -39,6 +39,7 @@ const cartEmptyEl = document.getElementById("cart-empty");
 const subtotalEl = document.getElementById("cart-subtotal");
 const discountRowEl = document.getElementById("cart-discount-row");
 const discountEl = document.getElementById("cart-discount");
+const taxRowEl = document.getElementById("cart-tax-row");
 const taxEl = document.getElementById("cart-tax");
 const totalEl = document.getElementById("cart-total");
 const chargeBtn = document.getElementById("charge-btn");
@@ -492,6 +493,7 @@ function renderCart() {
   subtotalEl.textContent = formatMoney(totals.subtotal, currency);
   discountRowEl.hidden = totals.discount <= 0;
   discountEl.textContent = `-${formatMoney(totals.discount, currency)}`;
+  taxRowEl.hidden = settings.taxEnabled === false;
   taxEl.textContent = formatMoney(totals.taxAmount, currency);
   totalEl.textContent = formatMoney(totals.total, currency);
   chargeBtn.disabled = cart.isEmpty;
@@ -586,6 +588,7 @@ async function confirmPayment() {
     })),
     subtotal: totals.subtotal,
     discount: totals.discount,
+    taxEnabled: settings.taxEnabled !== false,
     taxRate: getEffectiveTaxRate(),
     taxAmount: totals.taxAmount,
     total: totals.total,
